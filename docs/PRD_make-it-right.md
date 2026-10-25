@@ -18,6 +18,8 @@ FirstClub wins customers on quality: freshness comes up in 66% of its 1,149 posi
 | Positive reviews that mention quality or freshness | 1,149 positive reviews (`results/r6_positive_themes.csv`) | 66% |
 | FirstClub replies to 1–2★ reviews sending the customer to email (Aug–Oct 2026); replies mentioning a self-serve credit | 223 replies (`results/r8_reply_routing.csv`) | 72% (161); 0 |
 | "Not serviceable" complaints from people who never ordered: from cities FirstClub doesn't serve; explicitly found out only after entering details | 81 reviews (`results/r9_serviceability_split.csv`) | 25; 24 |
+| Support–churn link **within the same failure type** (Mantel-Haenszel odds ratio, stratified) | 136 failure reviews (`results/r10_support_churn_by_failure.csv`) | 4.1; late delivery 38.9% vs 5.6%, missing order 30.4% vs 11.5%, bad quality 10.0% vs 7.2% |
+| Rise in 1–2★ share of text reviews, Jan–May → Jun–Oct 2026, by stage | 1,529 text reviews (`results/r11_low_star_rise_by_stage.csv`) | 16.0% → 29.0%: customers who ordered +6.5 pts, never ordered +4.2, unclear +2.3 |
 | App walkthrough, 26 Oct 2026 ([screenshots](https://gitaakash28.github.io/firstclub-retention-teardown/prototype/)) | Fresh Android install, no past orders | Help = FAQs plus an AI assistant; "I want a refund" gets a clarifying question. Signup asks for phone, age and food preferences (each skippable) before showing whether they deliver. |
 
 **In customers' own words:**
@@ -28,6 +30,26 @@ FirstClub wins customers on quality: freshness comes up in 66% of its 1,149 posi
 **Supporting evidence from public grocery data (Instacart, US, 3.4M orders, `sql/`):** early orders show about twice the drop-off of later ones (the history ends at order 4 for 11.6% of customers vs 5.9% at order 20), and fresh-heavy first baskets go with longer histories (29.6% vs 20.6% reach 20+ orders). This is correlational, with no churn label, so I use it for direction only.
 
 **Takeaway:** quality earns the first order; a slow, effortful fix loses the customer, and the first few orders are where that matters most. These are review counts, not cohorts, which is why the bet ends in an A/B test.
+
+**What the stress test changed:**
+- The support–churn link survives stratifying by failure type (odds ratio 4.1), so severity across failure types doesn't explain it away.
+- It's strongest for **late and missing orders** (7 of 18 vs 2 of 36, and 7 of 23 vs 3 of 26). For **bad quality** the gap is small and rests on very few churn signals (2 of 20 vs 5 of 69), so it only suggests a direction. The design splits accordingly:
+  - **recovery** (fast, one-tap fixes) for late and missing orders;
+  - **prevention** (the quality lane) for quality, where a fast refund doesn't buy back trust.
+
+## Where this sits: the retention map
+| Stage | What the evidence says | Lever | Owner / next step |
+|---|---|---|---|
+| **Find the right customers** | 25 serviceability complaints from cities FirstClub doesn't serve; never-ordered complaints added 4.2 pts to the 1–2★ share | Say where you deliver (C) | Marketing and the store listing; no test needed |
+| **First five orders** | About half the rise in 1–2★ reviews (+6.5 of 13 pts from customers who ordered); quality in 33 of 76 first-order reviews; support–churn odds ratio 4.1 | **Prevent (A) + recover (B): this PRD** | Product, ops and support |
+| **Habit** | Subscriptions: 22 reviews averaging 2.91★, split 10 positive and 10 negative (pause and resume broken, delivery timing, and one report of a 25% overnight price rise), though these halved per review from Jan–Jun to Jul–Oct, so some may already be fixed. Fees and free-delivery minimums: 21 reviews averaging 2.00★, about twice as common per review since July 2026 (0.78 → 1.57 per 100; `results/r12_habit_signals.csv`) | Fix subscription reliability; test whether the free-delivery minimum pushes small top-ups elsewhere | Confirm which subscription bugs remain, then hand them to engineering. Fees: `day1_sql/09` and `10` first |
+| **Win back** | 46% of customers slow down at least once (Instacart, directional) | Overdue-customer watchlist and nudges | `day1_sql/06`; later |
+
+**Why the first five orders come first:**
+- **Reach:** every new customer passes through them, and customers who ordered account for about half the rise in 1–2★ reviews.
+- **Leverage:** before a habit forms, one bad experience is the whole relationship.
+- **Easier wins elsewhere:** the subscription problems are mostly **bugs** (pause and resume, delivery windows), so they're tickets for engineering, not a product bet.
+- **Unproven:** the fee hypothesis rests on 21 reviews and needs data (`day1_sql/10`) before anyone touches pricing.
 
 ## Design principles
 1. **Prevent before you compensate.** The best fix is the bad item that never ships.
@@ -89,6 +111,39 @@ Reach is relative (1–10) because FirstClub's volumes aren't public. Impact use
 | B. One-tap make-it-right | 6 | 2 | 70% | 3 | **2.8** | Targets the moment reviewers say they leave; needs the A/B test |
 
 **Call:** ship A and C now (an ops process and a communications change, each measured by its own simple before-and-after), and A/B test B, the product bet.
+
+## Edge cases
+| Case | Handling |
+|---|---|
+| Discounted order (e.g. WELCOME100) | Refund what the customer paid for the item: its price minus a pro-rated share of the discount, never the full MRP. |
+| Cash on delivery (if offered; two reviews say it isn't) | No source to refund to, so offer the never-expiring credit or a replacement, or a UPI refund once the customer adds an ID. |
+| Item already refunded at packing (short-pick auto-refund) | Hide it from the picker so it can't be claimed twice. |
+| Several claims on one order | Allowed until the 48-hour window closes; each item can be claimed once. |
+| Café and freshly prepared items | Same flow; "poor quality" needs a photo, because preparation varies. |
+| Subscription deliveries | Out of scope for v1. Handled by the subscription reliability fixes in the retention map. |
+| Late refund when delivery was already free | Refund the handling fee only. |
+| Customer offline when the order lands | The button stays available for 48 hours from delivery, not from app open. |
+
+## Tracking plan
+| Event | Key properties | Used for |
+|---|---|---|
+| `order_issue_entry_viewed` | order_id, order_n, hours_since_delivery | Discoverability (seen → tapped) |
+| `order_issue_started` | order_id, entry_point (order card / help / assistant) | Funnel start |
+| `order_issue_items_selected` | item_ids, reasons, claim_value | Mix of reasons; value distribution |
+| `order_issue_verified` | method (pack_data / photo / manual), approved | Share auto-approved by data, fraud checks |
+| `order_issue_remedy_chosen` | remedy (refund / credit / replacement), amount | Remedy preference; cost |
+| `order_issue_escalated` | reason (repeat_claimer / over_cap), assistant_session_id | Load on support |
+| `late_fee_refunded` | order_id, minutes_late, amount | Late-refund cost; ETA-creep guardrail |
+| `quality_lane_flagged` (ops) | order_id, store_id, checks_passed | Prevention coverage per store |
+
+Experiment assignment is logged once per customer at their first order (`experiment_assignments`), and every metric query joins on it.
+
+## Rollout
+1. **Week 0:** run the day-1 SQL for baselines (issue rate on orders 1–5, fix time, triggered-group size) and confirm the sample size.
+2. **Weeks 1–2:** start the quality lane in 2–3 dark stores, as a staggered rollout. Ship "say where you deliver".
+3. **Weeks 2–3:** build B behind a feature flag, and run an internal dogfood pass with ops verifying pack-data matches.
+4. **Weeks 4–8+:** run the A/B test at 50/50 for new customers, until the planned sample is reached and at least 4 weeks have passed.
+5. **Readout:** primary, triggered and guardrails, then a ship / iterate / kill call using the decision rule above.
 
 ## Out of scope (v1)
 - Customers beyond order 5 (phase 2 if the test wins).

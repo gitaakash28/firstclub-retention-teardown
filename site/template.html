@@ -114,6 +114,7 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
   <p>Share of new written reviews rated 1–2★, by month (2026). Hover a bar for review count and average rating. The overall store rating is still 4.7 across 10,862 ratings. Written reviews skew critical, so the signal here is the trend, not the level.</p>
   <div class="card"><div class="cols" id="monthly"></div><div class="xlabels" id="monthly-x"></div></div>
   <p class="finding" id="f1"></p>
+  <p class="finding" id="f1b"></p>
 
   <h2>2. Where the pain sits in the lifecycle</h2>
   <p>Negative and mixed reviews (≤3★) by the customer's stage. "Ordered" means the review describes a delivery or product, even when the reviewer doesn't say whether it was their first order.</p>
@@ -125,6 +126,10 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
   <p>Themes in the <span id="c-churn"></span> reviews where the customer says they uninstalled, stopped ordering or plan to leave. A review can carry up to 3 themes.</p>
   <div class="card" id="churn"></div>
   <p class="finding" id="f3"></p>
+  <h3>Stress test: does it hold within the same kind of failure?</h3>
+  <p>Share of failure reviews that signal churn, with and without a support complaint, split by failure type (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/deep_dives.py">script</a>).</p>
+  <div class="card table-wrap"><table id="stress"></table></div>
+  <p class="finding" id="f3b"></p>
   <blockquote>"If a packet of milk is not delivered and we try to raise it over chat, your team keeps us engaged for 30 minutes or more, repeating the same questions again and again."<cite>1★, June 2026</cite></blockquote>
   <blockquote>"First two orders were smooth and quality excellent… From the third one, it has been an ordeal… items missing."<cite>1★, May 2026</cite></blockquote>
 
@@ -134,7 +139,23 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
   <p class="finding">Quality and freshness dominate the praise. The product promise works. Retention depends on protecting that promise when something slips.</p>
   <blockquote>"Good experience on my first delivery… I have seen many cases where things start going wrong after the first couple of deliveries. Only time will tell."<cite>5★, May 2026</cite></blockquote>
 
-  <h2>5. What I'd measure on day 1</h2>
+  <h2>5. Beyond the first orders: the habit</h2>
+  <p>Retention isn't only avoiding bad first orders. Customers who stay build a routine, and FirstClub's routine products are its milk subscriptions and small top-up orders.</p>
+  <div class="card table-wrap"><table id="habit"></table></div>
+  <p class="finding">Subscriptions are the daily habit, and opinion is split: 10 positive and 10 negative reviews. The negative ones describe specific, fixable failures: pause and resume not working, delivery timing, and, from one reviewer, a 25% overnight price rise. Those are engineering tickets, not a product bet, and they were twice as common per review in Jan–Jun as in Jul–Oct, so some may already be fixed. I'd check what's still broken before prioritizing. Fee complaints roughly doubled per review after July 2026 (still small numbers), which may mean a fee was introduced or raised then. I'd test whether the free-delivery minimum pushes small top-up orders to other apps (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/10_fees_and_small_baskets.sql">query</a>) before anyone touches pricing.</p>
+  <div class="card table-wrap">
+    <h3>The retention map, and why I start with the first five orders</h3>
+    <table>
+      <tr><th>Stage</th><th>Evidence</th><th>Lever</th></tr>
+      <tr><td>Find the right customers</td><td>25 serviceability complaints from cities FirstClub doesn't serve</td><td>Say where you deliver</td></tr>
+      <tr><td><b>First five orders</b></td><td>About half the rise in 1–2★ reviews; quality in 33 of 76 first-order reviews; support–churn odds ratio 4.1</td><td><b>Prevent + recover (the bet below)</b></td></tr>
+      <tr><td>Habit</td><td>Subscription reviews split 10 positive, 10 negative (2.91★); fee complaints about twice as common per review since July</td><td>Check which subscription bugs remain and fix them; test the fee hypothesis with data first</td></tr>
+      <tr><td>Win back</td><td>Slowdowns are common and detectable (Instacart, directional)</td><td>Overdue-customer watchlist, later</td></tr>
+    </table>
+    <p class="note">Why first orders first: every new customer passes through them, one bad experience is the whole relationship before a habit forms, and the subscription fixes are bugs to hand to engineering rather than a bet to test.</p>
+  </div>
+
+  <h2>6. What I'd measure on day 1</h2>
   <p>Reviews tell you what customers say. Orders tell you what they do. These are the queries that turn this case study into FirstClub's own numbers, written in Postgres against an assumed schema that should take an hour to map to the real tables.</p>
   <div class="card table-wrap"><table>
     <tr><th>Question</th><th>Why it matters</th></tr>
@@ -143,11 +164,12 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
     <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/04_issue_rate_by_order_number.sql">Are early orders more likely to go wrong?</a></td><td>Sizes the problem</td></tr>
     <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/05_resolution_time_by_channel.sql">How long does a fix take today, by channel?</a></td><td>The "slow fix" the reviews describe</td></tr>
     <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/07_signup_funnel_by_pincode.sql">How many verified signups hit "not serviceable", by pincode?</a></td><td>Sizes the location-first fix</td></tr>
+    <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/09_subscription_health.sql">When a subscription delivery is missed, do subscribers cancel sooner?</a> · <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/10_fees_and_small_baskets.sql">do fee-paying first orders come back less?</a></td><td>The habit stage</td></tr>
     <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/01_weekly_cohort_retention.sql">Weekly first-order cohort retention</a> · <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/06_slowdown_watchlist.sql">overdue-customer watchlist</a> · <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/08_ab_readout.sql">A/B readout</a></td><td>The curve, the win-back list, and the readout</td></tr>
   </table>
   <p class="note">Tested end to end in DuckDB on synthetic data whose behaviour is random by design; every query also parses as Postgres. No numbers from that test are presented as findings.</p></div>
 
-  <h2>6. The bet: protect the first five orders</h2>
+  <h2>7. The bet: protect the first five orders</h2>
   <p>Four principles, then three changes. <b>Prevent before you compensate. Never hold a refund hostage. Trust the customer, verify with your own data. Give the existing AI a button.</b></p>
   <div class="card">
     <p><b>A. Prevent: a first-orders quality lane.</b> Packers get a flag on a customer's first 3 orders: best-in-crate produce, plus a minimum remaining shelf life on dairy and bakery (e.g. 3+ days), shown on product pages as a promise. Quality comes up in 33 of 76 first-order reviews.</p>
@@ -207,6 +229,18 @@ const posRow = (t) => find(DATA.positive, "theme_list", t);
 $("t-pos-quality").textContent = pct(posRow("quality_freshness").pct);
 const rr = Object.fromEntries((DATA.routing || []).map((r) => [r.route.split(" ")[0], r]));
 if (rr.total) { $("rr-total").textContent = rr.total.replies; $("rr-email").textContent = `${rr.email.replies} (${Math.round(rr.email.pct)}%)`; }
+const rise = Object.fromEntries(DATA.rise.map((r) => [r.period.slice(0, 2), r]));
+$("f1b").textContent = `It isn't one problem. The 1–2★ share of text reviews rose from ${rise.H1.pct_1_2_star_total}% to ${rise.H2.pct_1_2_star_total}%. Customers who ordered added ${(rise.H2.pct_1_2_star_ordered - rise.H1.pct_1_2_star_ordered).toFixed(1)} points, about half of the rise, and people who never ordered added ${(rise.H2.pct_1_2_star_never_ordered - rise.H1.pct_1_2_star_never_ordered).toFixed(1)}, about a third. So it's half a retention problem and a third an acquisition problem.`;
+const ST_LABEL = { delivery_speed: "Late delivery", order_failure: "Missing or failed order", payment_refund: "Payment or refund", quality_freshness: "Bad quality or freshness" };
+const st = DATA.stress.filter((r) => ST_LABEL[r.failure_theme]);
+const mh = DATA.stress.find((r) => !ST_LABEL[r.failure_theme]);
+$("stress").innerHTML = `<tr><th>Failure type</th><th class="num">With support complaint</th><th class="num">Without</th></tr>` +
+  Object.keys(ST_LABEL).map((k) => { const y = st.find((r) => r.failure_theme === k && r.mentions_support === true), n = st.find((r) => r.failure_theme === k && r.mentions_support === false);
+    return `<tr><td>${ST_LABEL[k]}</td><td class="num">${y.pct_churn_signal.toFixed(1)}% <span class="note">(n=${y.reviews})</span></td><td class="num">${n.pct_churn_signal.toFixed(1)}% <span class="note">(n=${n.reviews})</span></td></tr>`; }).join("");
+$("f3b").textContent = `It holds within each failure type (odds ratio ${mh.pct_churn_signal.toFixed(1)} after adjusting for type), so it isn't just that some failure types draw both more support complaints and more churn. Severity within a type could still play a part, which is what the A/B test settles. But it's strongest for late and missing orders and weak for bad quality. That splits the design: fast recovery for late and missing orders, and prevention for quality, where a quick refund doesn't buy back trust. Small samples, so treat these as direction.`;
+const HB = { subscription: "Subscriptions (milk, daily items)", fees_or_free_delivery_minimum: "Fees and free-delivery minimums" };
+$("habit").innerHTML = `<tr><th>Signal in reviews</th><th class="num">Reviews</th><th class="num">Avg stars</th><th class="num">Per 100 reviews, Jan–Jun 2026</th><th class="num">Per 100 reviews, Jul–Oct 2026</th></tr>` +
+  DATA.habit.map((r) => `<tr><td>${HB[r.signal]}</td><td class="num">${r.reviews}</td><td class="num">${r.avg_stars.toFixed(2)}★</td><td class="num">${r.per_100_reviews_jan_jun.toFixed(2)} <span class="note">(${r.jan_jun_2026})</span></td><td class="num">${r.per_100_reviews_jul_oct.toFixed(2)} <span class="note">(${r.jul_oct_2026})</span></td></tr>`).join("");
 const supYes = DATA.support.find((r) => r.mentions_support === true), supNo = DATA.support.find((r) => r.mentions_support === false);
 $("t-sup-x").textContent = `${(supYes.pct_churn_signal / supNo.pct_churn_signal).toFixed(1)}x`;
 $("t-sup-yes").textContent = `${supYes.pct_churn_signal}%`;

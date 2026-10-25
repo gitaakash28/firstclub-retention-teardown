@@ -56,3 +56,17 @@ CREATE TABLE experiment_assignments (
   variant       TEXT,            -- 'control' | 'treatment'
   assigned_at   TIMESTAMP        -- the customer's first order (every new customer is randomized)
 );
+
+CREATE TABLE subscriptions (       -- daily milk / staples subscriptions
+  subscription_id BIGINT PRIMARY KEY,
+  customer_id   BIGINT REFERENCES customers,
+  sku_id        BIGINT,
+  started_at    TIMESTAMP,
+  cancelled_at  TIMESTAMP          -- NULL = still active
+);
+
+CREATE TABLE subscription_deliveries (
+  subscription_id BIGINT REFERENCES subscriptions,
+  delivery_date DATE,
+  status        TEXT               -- 'delivered' | 'missed' | 'skipped_by_customer'
+);

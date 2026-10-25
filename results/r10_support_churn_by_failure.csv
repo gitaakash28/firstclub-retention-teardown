@@ -1,0 +1,10 @@
+failure_theme,mentions_support,reviews,churn_signal,pct_churn_signal
+delivery_speed,True,18,7.0,38.9
+delivery_speed,False,36,2.0,5.6
+order_failure,True,23,7.0,30.4
+order_failure,False,26,3.0,11.5
+payment_refund,True,11,4.0,36.4
+payment_refund,False,25,5.0,20.0
+quality_freshness,True,20,2.0,10.0
+quality_freshness,False,69,5.0,7.2
+"Mantel-Haenszel odds ratio, stratified by primary failure theme (n=136)",,136,,4.12

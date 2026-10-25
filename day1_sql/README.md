@@ -11,6 +11,8 @@ These are the queries I'd run in my first week on FirstClub's retention project.
 | [05](05_resolution_time_by_channel.sql) | How long does a fix take today, by channel (median, p90, unresolved)? | The "slow fix" the reviews describe |
 | [06](06_slowdown_watchlist.sql) | Which customers are overdue against their own rhythm right now? | Win-back list |
 | [07](07_signup_funnel_by_pincode.sql) | How many verified signups hit "not serviceable", by pincode? | Sizes the location-first onboarding fix |
+| [09](09_subscription_health.sql) | When a subscription delivery is missed, do subscribers cancel sooner? | Subscriptions are the daily habit, and the most loyal customers |
+| [10](10_fees_and_small_baskets.sql) | Near the free-delivery minimum (±₹50), do first orders that paid a fee come back less? | A first read on whether the minimum pushes top-ups elsewhere (observational) |
 | [08](08_ab_readout.sql) | Make-it-right A/B readout: every new customer randomized at their first order; early-habit lift with a 95% CI, a pre-registered readout on failures FirstClub's own data detects, and cost and claim-rate guardrails | Hypothesis-to-readout, end to end, without selection bias |
 
 ## Tested, not analysed

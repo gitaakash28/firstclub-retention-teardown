@@ -7,9 +7,11 @@ An outside-in look at customer retention for [FirstClub](https://play.google.com
 ## What I found
 1. **New reviews turned more critical as FirstClub scaled.** The average rating of new written reviews fell from 4.37 (Jan–May 2026) to 3.92 (Jun–Oct 2026), and 1–2★ reviews rose from 13.8% to 24.9%. The overall store rating is still 4.7 across 10,862 ratings.
 2. **Failures start the exit, and support decides it.** Among negative reviews that describe a failed order, late delivery, payment problem or bad produce, 24.2% signal churn when they also complain about support (n=62), vs 7.2% when they don't (n=167).
-3. **Quality is the reason customers stay.** 66% of positive reviews mention quality or freshness.
-4. **30% of negative reviews come from people who never ordered.** They hit "area not serviceable" after signing up, or OTP and login bugs.
-5. **Appendix, US grocery benchmark (not FirstClub data):** in Instacart's public data, the order history ends at order 4 for 11.6% of customers, vs 5.9% at order 20. Fresh-heavy early baskets go with longer histories (29.6% vs 20.6% have 20+ observed orders).
+3. **It survives a stress test.** Within each failure type the link holds (odds ratio 4.1), and it's strongest for late and missing orders and weak for bad quality. So the design uses recovery for late and missing orders and prevention for quality (`r10`).
+4. **Quality is the reason customers stay.** 66% of positive reviews mention quality or freshness.
+5. **The habit is at risk too.** Subscription reviews average 2.91★, split 10 positive and 10 negative (pause and resume, delivery timing), though they halved per review in Jul–Oct, and fee complaints roughly doubled per review from Jan–Jun to Jul–Oct 2026 (`r12`).
+6. **30% of negative reviews come from people who never ordered.** They hit "area not serviceable" after signing up, or OTP and login bugs.
+7. **Appendix, US grocery benchmark (not FirstClub data):** in Instacart's public data, the order history ends at order 4 for 11.6% of customers, vs 5.9% at order 20. Fresh-heavy early baskets go with longer histories (29.6% vs 20.6% have 20+ observed orders).
 
 **The bet: protect the first five orders.**
 - **Prevent:** an extra quality check on first orders, with a guaranteed minimum shelf life.

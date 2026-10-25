@@ -67,6 +67,24 @@ data = {"app_events": events, "customers": customers, "orders": orders, "order_i
 for name, rows in data.items():
     pd.DataFrame(rows, columns=cols[name]).to_parquet(OUT / f"{name}.parquet", index=False)
 
+# Subscriptions: ~15% of customers subscribe to a daily item; misses and cancellations are independent noise.
+subs, sub_del = [], []
+cust = pd.DataFrame(customers, columns=cols["customers"])
+for sid, row in enumerate(cust.sample(frac=0.15, random_state=7).itertuples(), start=1):
+    start = (row.signup_at + pd.Timedelta(days=int(rng.integers(1, 20)))).normalize()
+    cancel = None
+    day = start
+    while day < END:
+        status = "skipped_by_customer" if rng.random() < 0.08 else ("missed" if rng.random() < 0.04 else "delivered")
+        sub_del.append((sid, day.date(), status))
+        if rng.random() < 0.006:
+            cancel = day + pd.Timedelta(hours=20)
+            break
+        day += pd.Timedelta(days=1)
+    subs.append((sid, row.customer_id, int(rng.integers(1, 50)), start, cancel))
+pd.DataFrame(subs, columns=["subscription_id", "customer_id", "sku_id", "started_at", "cancelled_at"]).to_parquet(OUT / "subscriptions.parquet", index=False)
+pd.DataFrame(sub_del, columns=["subscription_id", "delivery_date", "status"]).to_parquet(OUT / "subscription_deliveries.parquet", index=False)
+
 # Experiment: every new customer randomised 50/50 at their first order (intent to treat).
 o = pd.DataFrame(orders, columns=cols["orders"]).sort_values("created_at")
 first = o.groupby("customer_id").head(1)
