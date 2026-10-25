@@ -11,7 +11,12 @@ An outside-in look at customer retention for [FirstClub](https://play.google.com
 4. **30% of negative reviews come from people who never ordered.** They hit "area not serviceable" after signing up, or OTP and login bugs.
 5. **Appendix, US grocery benchmark (not FirstClub data):** in Instacart's public data, the order history ends at order 4 for 11.6% of customers, vs 5.9% at order 20. Fresh-heavy early baskets go with longer histories (29.6% vs 20.6% have 20+ observed orders).
 
-**The bet:** make it right in one tap. Customers get an instant credit for a bad or missing item in their first 5 orders, with no chat, tested as a customer-level A/B with 14-day repeat rate as the primary metric. Location-first onboarding ships alongside it as a quick win.
+**The bet: protect the first five orders.**
+- **Prevent:** an extra quality check on first orders, with a guaranteed minimum shelf life.
+- **Recover:** a one-tap "Something not right?" on the order. It checks FirstClub's own packing data, the customer chooses a refund to their original payment method, a credit that never expires or a replacement, and hard cases go to the existing AI assistant.
+- **Say where you deliver, early:** name the cities served in the store listing and ads, and check the pincode before asking for a phone number.
+
+The recovery part is A/B tested by randomizing every new customer. Prevention rolls out store by store.
 
 ## Repo map
 | Path | What |
@@ -21,13 +26,14 @@ An outside-in look at customer retention for [FirstClub](https://play.google.com
 | `reviews/tagged_reviews.csv` | 1,714 tagged reviews (reviewer names and developer replies not stored) |
 | `scripts/check_tags.py` | Checks LLM theme tags against keyword rules (96–100% pooled agreement on 4 themes) |
 | `scripts/review_analysis.py` | Review summaries → `results/r*.csv` |
+| `scripts/reply_routing.py`, `scripts/serviceability_split.py` | Where FirstClub's replies send complainants (`r8`); serviceability complaints by city and late discovery (`r9`) |
 | `day1_sql/` | 8 Postgres queries for FirstClub's own retention questions, on an assumed schema; tested on synthetic data only |
 | `prototype/` | Clickable concept of the one-tap fix flow |
 | `.github/workflows/weekly-pulse.yml` | Weekly job: scrape → LLM-tag new reviews → rebuild `pulse/` |
 | `scripts/tag_new_reviews.py`, `scripts/build_pulse.py` | The pulse pipeline (needs a `GROQ_API_KEY` repo secret for tagging) |
 | `sql/*.sql` | Appendix: benchmark queries on the US Instacart dataset (DuckDB, Postgres-style SQL) |
 | `scripts/run_queries.py` | Runs `sql/` → `results/0*.csv` |
-| `scripts/sample_size.py` | A/B test sample sizes → `results/e1_sample_size.csv` |
+| `scripts/sample_size.py` | A/B sample sizes: triggered readout (`e1`) and intent-to-treat (`e2`) |
 | `scripts/build_site.py` | Injects `results/` into `site/template.html` → `index.html` |
 
 ## Reproduce

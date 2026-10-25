@@ -1,2 +1,2 @@
-n_treatment,n_control,pct_reorder_14d_treatment,pct_reorder_14d_control,lift_pp,ci95_low_pp,ci95_high_pp,guardrail_credit_pct_gmv_treatment,guardrail_credit_pct_gmv_control,guardrail_claims_per_100_orders_treatment,guardrail_claims_per_100_orders_control
-476,451,60.1,62.1,-2.0,-8.3,4.3,10.52,10.34,7.9,6.9
+n_treatment,n_control,habit_30d_treatment_pct,habit_30d_control_pct,lift_pp,ci95_low_pp,ci95_high_pp,triggered_n_treatment,triggered_n_control,triggered_reorder_14d_treatment_pct,triggered_reorder_14d_control_pct,guardrail_credit_pct_gmv_treatment,guardrail_credit_pct_gmv_control,guardrail_claims_per_100_orders_treatment,guardrail_claims_per_100_orders_control
+2036,2067,52.0,52.2,-0.29,-3.34,2.77,797,831,62.5,58.5,1.12,1.19,6.4,6.4

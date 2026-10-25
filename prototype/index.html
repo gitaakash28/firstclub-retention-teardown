@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Make-It-Right Prototype</title>
-<meta name="description" content="Concept prototype for FirstClub, built on a walkthrough of the real app: one-tap fixes for early orders, a hand-off to the existing AI assistant, and location-first onboarding.">
+<meta name="description" content="Concept prototype for FirstClub, built on a walkthrough of the real app: one-tap fixes for early orders verified with packing data, a remedy the customer chooses, a hand-off to the existing AI assistant, and location-first onboarding.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Serif+Display&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -119,12 +119,12 @@ footer { margin-top: 56px; font-size: .85rem; color: var(--muted); }
   <h3>Signing up</h3>
   <div class="strip">
     <figure class="shot"><img src="img/today_onb_1_welcome.jpg" alt="FirstClub welcome screen" loading="lazy"><figcaption><b>1</b> Welcome</figcaption></figure>
-    <figure class="shot"><img src="img/today_onb_2_phone.jpg" alt="Phone number entry" loading="lazy"><figcaption><b>2</b> Phone number first</figcaption></figure>
-    <figure class="shot"><img src="img/today_onb_3_age.jpg" alt="Age question" loading="lazy"><figcaption><b>3</b> Age</figcaption></figure>
-    <figure class="shot"><img src="img/today_onb_4_habits.jpg" alt="Food habits and trust preferences" loading="lazy"><figcaption><b>4</b> Food habits and "what builds your trust"</figcaption></figure>
+    <figure class="shot"><img src="img/today_onb_2_phone.jpg" alt="Phone number entry" loading="lazy"><figcaption><b>2</b> Phone number first (skippable)</figcaption></figure>
+    <figure class="shot"><img src="img/today_onb_3_age.jpg" alt="Age question" loading="lazy"><figcaption><b>3</b> Age (skippable)</figcaption></figure>
+    <figure class="shot"><img src="img/today_onb_4_habits.jpg" alt="Food habits and trust preferences" loading="lazy"><figcaption><b>4</b> Food habits and "what builds your trust" (skippable)</figcaption></figure>
     <figure class="shot"><img src="img/today_onb_5_home.jpg" alt="Home screen showing delivery status" loading="lazy"><figcaption><b>5</b> Only now: do they deliver to you?</figcaption></figure>
   </div>
-  <p class="finding">Four steps come before you learn whether FirstClub delivers to you. In Play Store reviews, 81 of the 139 complaints from people who never ordered are about finding out late that their area isn't served.</p>
+  <p class="finding">The default path asks for your phone number, age and food preferences before showing whether FirstClub delivers to you. Each screen can be skipped, but 24 reviewers say they found out only after entering their details, and 25 more are from cities FirstClub doesn't serve at all, which the store listing never mentions.</p>
 
   <h3>Getting help</h3>
   <div class="strip">
@@ -146,14 +146,14 @@ footer { margin-top: 56px; font-size: .85rem; color: var(--muted); }
     <div class="notes">
       <p><b>Pick a scenario:</b></p>
       <div class="scen" id="scen">
-        <button data-s="normal" class="on">Bad item on the 3rd order<small>Fresh item under the cap: instant credit, no chat, no photo</small></button>
+        <button data-s="normal" class="on">Bad item on the 3rd order<small>Checked against packing data, approved instantly; you choose refund, credit or replacement</small></button>
         <button data-s="cap">Large claim<small>Over ₹400: one photo, credit still instant</small></button>
         <button data-s="repeat">4th report in 30 days<small>Hand-off to the existing AI assistant, with the order already attached</small></button>
-        <button data-s="late">Late delivery<small>Missed the ETA by 15+ minutes: credit arrives before they ask</small></button>
+        <button data-s="late">Late delivery<small>15+ minutes past the promised ETA: the delivery and handling fee is refunded automatically</small></button>
         <button data-s="onboard">New user: location first<small>Check the pincode before asking for a phone number</small></button>
       </div>
       <div id="explain"></div>
-      <p class="note">Concept screens recreate FirstClub's colours and type from the screenshots. Product photos and the Shimla apple and Nagpur orange prices come from the live catalogue; other prices, the assistant's replies and the serviceable areas are illustrative.</p>
+      <p class="note">Concept screens recreate FirstClub's colours and type from the screenshots. Product photos and the Shimla apple and Nagpur orange prices come from the live catalogue; other prices, fees, packing data, the assistant's replies and the serviceable areas are illustrative. The first-orders quality lane (prevention) is an ops change in the dark store, so it isn't shown here.</p>
     </div>
   </div>
 
@@ -172,15 +172,18 @@ const ITEMS = [
 const ORDER_TOTAL = ITEMS.reduce((t, i) => t + i.price, 0);
 const REASONS = ["Missing", "Damaged", "Poor quality", "Expired"];
 const CAP = 400;
+const SHORT_PICKED = { milk: true };   // simulated packing record: the milk was short-picked for this order
+const FEE = 39;                          // illustrative delivery + handling fee for this order
+const verified = (k) => SHORT_PICKED[k] && S.reason[k] === "Missing";
 const EXPLAIN = {
   normal: [["One button, where the problem is", "\"Something not right?\" sits on the order card for 48 hours after delivery, for a customer's first 5 orders. Today the path is Help & Support → FAQs or the assistant."],
-           ["Two taps, no typing", "Pick the item, pick a reason. A fresh item under the cap needs no photo. Asking someone to prove spoiled milk is the trust tax the reviews complain about."],
-           ["Credit before the screen changes", "Wallet credit by default, or a free replacement in the next order, which also brings the next order forward."]],
+           ["Trust the customer, verify with your own data", "Try 'A2 cow milk → Missing': the packing record shows it was short-picked, so it's approved with no photo. For anything the data can't confirm, one photo keeps abuse down without sending anyone to chat."],
+           ["Never hold a refund hostage", "The customer picks a refund to their original payment method, an instant credit that never expires, or a free replacement. Nothing is preselected. Wallet lock-in reads as a trap for a trust brand."]],
   cap: [["A cap with a soft landing", "Above ₹400, one photo is needed, but the credit is still instant once it's added. Cost stays bounded without sending anyone to chat."]],
-  repeat: [["Use the AI FirstClub already has", "On the 4th report in 30 days, the claim goes to the existing assistant with the order and items attached, and a person calls back. The customer never re-explains. Claims per 100 orders is a guardrail in the A/B readout."]],
-  late: [["Say sorry before they ask", "If delivery misses the promised ETA by 15+ minutes, a small credit and an apology arrive automatically."]],
+  repeat: [["Use the AI FirstClub already has", "On the 4th report in 30 days, the claim goes to the existing assistant with the order and items attached, and a person calls back. The customer never re-explains, and the copy never tells them they've been flagged. Claims per 100 orders is a guardrail in the A/B readout."]],
+  late: [["Say sorry before they ask", "15+ minutes past the promised ETA refunds that order's delivery and handling fee automatically. The cost is bounded and it speaks to the fee complaints. Guardrail: promised ETAs must not creep up to avoid refunds."]],
   onboard: [["Pincode first, phone later", "Today, phone number, age and food preferences come before serviceability. Checking the pincode first saves unserved users four steps, and lets FirstClub collect a 'notify me' list to plan its next dark stores."],
-            ["Why it's ranked first", "RICE 7.2, the highest of the three ideas: cheap to build, and it addresses 81 of the 139 pre-order complaints in reviews. It ships without a test; track install → signup conversion by pincode."]],
+            ["Part of a wider fix", "RICE 4.0. 24 reviewers say they found out late, and 25 more are from cities FirstClub doesn't serve, so the store listing and ads should name the cities served too, with a city waitlist. Ships without a test; track install → first-order conversion by pincode."]],
 };
 const ICON = {
   today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3c2 3 2 6 0 9-2-3-2-6 0-9zM5 9c3 0 5 2 7 5-3 0-5-2-7-5zm14 0c-3 0-5 2-7 5 3 0 5-2 7-5zM12 14v7"/></svg>',
@@ -213,13 +216,13 @@ function render() {
         <div class="p-row"><b>Today, 8:12 AM</b><span class="p-tag ${late ? "late" : ""}">${late ? "Delivered · 22 min late" : "Delivered · 18 min ago"}</span></div>
         <div class="p-muted">${ITEMS.length} items · ${rupee(ORDER_TOTAL)} · your 3rd order</div>
         <div class="p-thumbs">${ITEMS.map((i) => `<img src="${i.img}" alt="${i.name}">`).join("")}</div>
-        ${late ? `<div class="p-banner">₹30 added to your wallet for the late delivery. Sorry, that's on us.</div>` : ""}
+        ${late ? `<div class="p-banner">Your order was 22 min late, so the ${rupee(FEE)} delivery and handling fee has been refunded. Sorry, that's on us.</div>` : ""}
         <button class="p-btn ghost" id="go">Something not right?</button>
         <div class="p-muted p-center" style="margin-top:6px">Fix it in seconds · available for 48 hours</div>
       </div>
       <div class="p-card"><div class="p-row"><b>Last Sunday</b><span class="p-muted">Delivered</span></div><div class="p-muted">9 items · ${rupee(1630)}</div></div>`;
     $("go").onclick = () => { S.step = "pick"; render(); };
-    if (late && !S.toasted) { S.toasted = true; setTimeout(() => toast("<b>₹30 added to your wallet</b><br>Your order arrived 22 min after the promised time. No need to ask."), 300); }
+    if (late && !S.toasted) { S.toasted = true; setTimeout(() => toast(`<b>${rupee(FEE)} fee refunded</b><br>Your order arrived 22 min after the promised time. No need to ask.`), 300); }
   }
   if (S.step === "pick") {
     sc.innerHTML = `${bar("What wasn't right?")}
@@ -231,17 +234,17 @@ function render() {
           </div>
           <div class="p-check">${S.picked[i.id] ? "✓" : ""}</div>
         </div>`).join("")}</div>
-      ${total() > CAP ? `<div class="p-banner warn">Claims over ${rupee(CAP)} need one photo. Your credit is still instant.</div>` : ""}
+      ${picked().length && ready() ? (picked().every(verified) && total() <= CAP ? `<div class="p-banner">✓ Matches our packing record. Approved, no photo needed.</div>` : `<div class="p-banner warn">One quick photo and it's approved instantly.</div>`) : ""}
       <button class="p-btn" id="next" ${ready() ? "" : "disabled"}>Continue${total() ? " · " + rupee(total()) : ""}</button>`;
     $("back").onclick = () => { S.step = "orders"; render(); };
     sc.querySelectorAll(".p-item").forEach((el) => el.onclick = (e) => { if (e.target.classList.contains("p-chip")) return; S.picked[el.dataset.id] = !S.picked[el.dataset.id]; render(); });
     sc.querySelectorAll(".p-chip").forEach((el) => el.onclick = (e) => { e.stopPropagation(); S.reason[el.dataset.id] = el.dataset.r; render(); });
-    $("next").onclick = () => { S.step = S.scenario === "repeat" ? "assistant" : (total() > CAP ? "photo" : "resolve"); render(); };
+    $("next").onclick = () => { S.step = S.scenario === "repeat" ? "assistant" : (total() > CAP || !picked().every(verified) ? "photo" : "resolve"); render(); };
   }
   if (S.step === "photo") {
     sc.innerHTML = `${bar("Add one photo")}
       <div class="p-card p-center" style="padding:34px 14px"><div style="font-size:40px">📷</div>
-      <p class="p-muted">Claims over ${rupee(CAP)} need one photo of the items. Your credit lands the moment it's added.</p>
+      <p class="p-muted">${total() > CAP ? `Claims over ${rupee(CAP)} need one photo.` : "We couldn't confirm this from our packing record, so one photo helps."} Approval is instant once it's added.</p>
       <button class="p-btn ghost" id="snap">Take photo</button></div>
       <button class="p-btn" id="next" disabled>Continue</button>`;
     $("back").onclick = () => { S.step = "pick"; render(); };
@@ -249,10 +252,13 @@ function render() {
     $("next").onclick = () => { S.step = "resolve"; render(); };
   }
   if (S.step === "resolve") {
-    sc.innerHTML = `${bar("How should we fix it?")}
-      <div class="p-opt ${S.resolution === "credit" ? "on" : ""}" data-v="credit"><div style="font-size:22px">💳</div><div><b>Instant wallet credit · ${rupee(total())}</b><div class="p-muted">Lands now. Use it on any order.</div></div></div>
-      <div class="p-opt ${S.resolution === "replace" ? "on" : ""}" data-v="replace"><div style="font-size:22px">🔁</div><div><b>Free replacement</b><div class="p-muted">Added to your next order at no cost.</div></div></div>
-      <button class="p-btn" id="next" style="margin-top:6px">Confirm</button>`;
+    const opt = (v, icon, title, sub) => `<div class="p-opt ${S.resolution === v ? "on" : ""}" data-v="${v}"><div style="font-size:22px">${icon}</div><div><b>${title}</b><div class="p-muted">${sub}</div></div></div>`;
+    sc.innerHTML = `${bar("How should we make it right?")}
+      ${picked().every(verified) && total() <= CAP ? `<div class="p-banner">✓ Approved: matches our packing record</div>` : `<div class="p-banner">✓ Approved</div>`}
+      ${opt("refund", "↩️", `Refund to original payment · ${rupee(total())}`, "Back to your UPI or card in 2–3 days")}
+      ${opt("credit", "💳", `Instant credit · ${rupee(total())}`, "Available now and never expires")}
+      ${opt("replace", "🔁", "Free replacement", "Added to your next order at no cost")}
+      <button class="p-btn" id="next" style="margin-top:6px" ${S.resolution ? "" : "disabled"}>Confirm</button>`;
     $("back").onclick = () => { S.step = "pick"; render(); };
     sc.querySelectorAll(".p-opt").forEach((el) => el.onclick = () => { S.resolution = el.dataset.v; render(); });
     $("next").onclick = () => { S.step = "done"; render(); };
@@ -263,7 +269,7 @@ function render() {
       <div class="p-orb">✦</div>
       <h2 class="p-title p-center">We're on it</h2>
       <div class="p-ctx" style="margin-top:14px"><b>Shared with the assistant automatically</b><br>Order from today, 8:12 AM · ${lines}</div>
-      <div class="p-bubble">I can see what went wrong with today's order. Since this is your 4th report this month, a teammate will call you within 30 minutes to fix it properly. You won't need to explain anything again.</div>
+      <div class="p-bubble">I can see what went wrong with today's order. A teammate will call you within 30 minutes to sort it out, and you won't need to explain anything again.</div>
       <div class="p-bubble me">Thanks</div>
       <button class="p-btn" id="done" style="margin-top:8px">Done</button>
       <p class="p-muted p-center" style="font-size:11px;margin-top:10px">Assistant reply is illustrative</p></div>`;
@@ -272,8 +278,8 @@ function render() {
   }
   if (S.step === "done") {
     sc.innerHTML = `<div class="p-tick">✓</div>
-      <div class="p-big">${S.resolution === "credit" ? rupee(total()) + " added" : "Replacement booked"}</div>
-      <div class="p-muted p-center">${S.resolution === "credit" ? "to your wallet, just now" : "It comes free with your next order"}</div>
+      <div class="p-big">${S.resolution === "refund" ? rupee(total()) + " refund started" : S.resolution === "credit" ? rupee(total()) + " added" : "Replacement booked"}</div>
+      <div class="p-muted p-center">${S.resolution === "refund" ? "Back to your original payment method in 2–3 days" : S.resolution === "credit" ? "Available now · never expires" : "It comes free with your next order"}</div>
       <div class="p-card" style="margin-top:18px"><b>Thanks for telling us.</b><div class="p-muted">Your report went to the quality team for this store and batch, so it doesn't happen to the next person.</div></div>
       <div class="p-card p-center"><div class="p-muted">How was this fix?</div><div class="p-stars">${[1, 2, 3, 4, 5].map((n) => `<span data-n="${n}" class="${n <= S.stars ? "on" : ""}">★</span>`).join("")}</div></div>
       <button class="p-btn ghost" id="again">Back to orders</button>`;
@@ -315,7 +321,7 @@ function render() {
 }
 
 function reset(s) {
-  S = { scenario: s, step: s === "onboard" ? "pin" : "orders", picked: {}, reason: {}, resolution: "credit", stars: 0, toasted: false };
+  S = { scenario: s, step: s === "onboard" ? "pin" : "orders", picked: {}, reason: {}, resolution: null, stars: 0, toasted: false };
   if (s === "cap") { S.picked = { apple: true, eggs: true, milk: true, bread: true }; S.reason = { apple: "Poor quality", eggs: "Damaged", milk: "Expired", bread: "Missing" }; }
   document.querySelectorAll("#scen button").forEach((b) => b.classList.toggle("on", b.dataset.s === s));
   $("explain").innerHTML = (EXPLAIN[s] || []).map(([h, t]) => `<div class="note-step"><b>${h}</b><br>${t}</div>`).join("");

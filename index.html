@@ -118,7 +118,7 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
   <h2>2. Where the pain sits in the lifecycle</h2>
   <p>Negative and mixed reviews (≤3★) by the customer's stage. "Ordered" means the review describes a delivery or product, even when the reviewer doesn't say whether it was their first order.</p>
   <div class="card" id="stage"></div>
-  <p class="finding">30% of the pain comes before the first order: people find out the app doesn't serve their area only after they've signed up, or they get stuck on the OTP screen. That's a signup leak with a cheap fix. The retention problem is in the reviews from people who ordered.</p>
+  <p class="finding">30% of the pain comes before the first order, mostly "not serviceable" and OTP or login trouble. Of the 81 serviceability complaints, 25 come from cities FirstClub doesn't serve at all, and 24 explicitly say they found out only after entering their details (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/serviceability_split.py">split</a>). That's half a communications fix (say where you deliver) and half an onboarding fix. The retention problem is in the reviews from people who ordered.</p>
   <blockquote>"The app makes you enter all personal details and complete the entire setup, only to state at the very end that service is not available in my location. You should verify address/pincode serviceability at the very first step."<cite>1★, September 2026. The same complaint runs from October 2025 through September 2026.</cite></blockquote>
 
   <h2>3. What customers who leave talk about</h2>
@@ -147,21 +147,34 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
   </table>
   <p class="note">Tested end to end in DuckDB on synthetic data whose behaviour is random by design; every query also parses as Postgres. No numbers from that test are presented as findings.</p></div>
 
-  <h2>6. The bet: make it right in one tap</h2>
+  <h2>6. The bet: protect the first five orders</h2>
+  <p>Four principles, then three changes. <b>Prevent before you compensate. Never hold a refund hostage. Trust the customer, verify with your own data. Give the existing AI a button.</b></p>
   <div class="card">
-    <p><b>What:</b> for a customer's first 5 orders, a "Something not right?" button on the order card for 48 hours after delivery. The customer picks the items and gets an instant wallet credit, with no chat and no photo for fresh items under a cap. A small automatic credit also lands when delivery misses the promised ETA by more than 15 minutes. Every claim is tagged by SKU, batch and store and feeds the quality team.</p>
-    <p><b>Primary metric:</b> among customers who report an issue in their first 5 orders, the share who order again within 14 days. <b>Guardrails:</b> credit cost as a percentage of GMV, claims per 100 orders, repeat claimers, and support contact rate.</p>
-    <p><b>Test:</b> randomize 50/50 by customer at their first issue. With an assumed 40% baseline, detecting +8 pp needs 604 customers per arm (1,208 total) at α = 0.05 and 80% power (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/sample_size.py">calculation</a>). Run at least 2 full weeks and look at the result only at the planned end.</p>
+    <p><b>A. Prevent: a first-orders quality lane.</b> Packers get a flag on a customer's first 3 orders: best-in-crate produce, plus a minimum remaining shelf life on dairy and bakery (e.g. 3+ days), shown on product pages as a promise. Quality comes up in 33 of 76 first-order reviews.</p>
+    <p><b>B. Recover: "Something not right?" on the order card</b> for 48 hours, on a customer's first 5 orders.</p>
+    <ul>
+      <li><b>Approval:</b> instant when FirstClub's own pick or pack data agrees (short-picked or substituted); otherwise one photo, still instant under the cap.</li>
+      <li><b>The customer chooses the remedy:</b> a refund to the original payment method, an instant credit that <b>never expires</b>, or a free replacement in the next order.</li>
+      <li><b>Late delivery:</b> 15+ minutes past the promised ETA refunds that order's delivery and handling fee automatically.</li>
+      <li><b>Repeat claimers</b> go to FirstClub's existing AI assistant with the order already attached, and a person calls back.</li>
+      <li><b>Closing the loop:</b> every claim is logged by SKU, batch and store, and the customer hears what changed.</li>
+    </ul>
+    <p><b>C. Say where you deliver, early.</b> Name the cities served in the store listing and ads, add a city waitlist, and check the pincode before asking for a phone number.</p>
   </div>
-  <div class="links"><a class="primary" href="prototype/">Try the clickable prototype</a></div>
-  <p class="assume"><b>Is this already built? I checked FirstClub's own replies.</b> Of FirstClub's <span id="rr-total"></span> developer replies to 1–2★ reviews from Aug–Oct 2026, <b id="rr-email"></b> ask the customer to email support with their order details, and none mention a self-serve credit or refund (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/reply_routing.py">script</a>). In a walkthrough of the app on 26 Oct 2026, help was FAQs plus an AI assistant, and asking it for a refund started a back-and-forth (<a href="prototype/">screenshots</a>). So the concept gives that assistant a button: one tap on the order hands it the items and the problem. I had no past orders, so the order-level help path is the one thing I couldn't check.</p>
+  <div class="card">
+    <p><b>How to test B:</b> randomize <b>every new customer</b> at their first order. The button itself changes who reports issues, so randomizing only the people who complain would compare different kinds of customers. <b>Primary:</b> the share of new customers with 3+ orders in their first 30 days. <b>Pre-registered readout:</b> 14-day reorder after a failure FirstClub's own data detects (late, short-picked), which fires the same way in both arms.</p>
+    <p><b>Size:</b> 6,086–26,289 new customers per arm, depending on how many hit an issue (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/sample_size.py">calculation</a>). That's a few weeks at FirstClub's scale; run at least 4. <b>Guardrails:</b> credit cost as a percentage of GMV, claims per 100 orders, claims from accounts under 7 days old (the ₹100 welcome offer is an abuse risk), and promised delivery times must not creep up.</p>
+    <p><b>A is tested separately</b> with a staggered store-by-store rollout, since it's an ops process, not a screen.</p>
+  </div>
+  <div class="links"><a class="primary" href="prototype/">Today vs proposed: try the prototype</a></div>
+  <p class="assume"><b>Is this already built? I checked FirstClub's own replies.</b> Of FirstClub's <span id="rr-total"></span> developer replies to 1–2★ reviews from Aug–Oct 2026, <b id="rr-email"></b> ask the customer to email support with their order details, and none mention a self-serve credit or refund (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/reply_routing.py">script</a>). In a walkthrough of the app on 26 Oct 2026, help was FAQs plus an AI assistant, and asking it for a refund started a back-and-forth (<a href="prototype/">screenshots</a>). I had no past orders, so the order-level help path is the one thing I couldn't check.</p>
   <div class="card table-wrap">
-    <h3>Why this, and what ships alongside it (RICE)</h3>
+    <h3>What ships first (RICE)</h3>
     <table>
       <tr><th>Idea</th><th class="num">RICE</th><th>Call</th></tr>
-      <tr><td>Location-first onboarding (check serviceability before login)</td><td class="num">7.2</td><td>Ship now; no test needed. Fixes the 30% pre-order leak.</td></tr>
-      <tr><td>One-tap make-it-right</td><td class="num">2.8</td><td>The retention bet. A/B test it.</td></tr>
-      <tr><td>Restock nudge timed to each customer's cadence</td><td class="num">1.8</td><td>Next, once early habits are protected.</td></tr>
+      <tr><td>A. First-orders quality lane</td><td class="num">4.2</td><td>Ship now; staggered store-by-store rollout</td></tr>
+      <tr><td>C. Say where you deliver, early</td><td class="num">4.0</td><td>Ship now; track install → first-order conversion</td></tr>
+      <tr><td>B. One-tap make-it-right</td><td class="num">2.8</td><td>The product bet. A/B test it.</td></tr>
     </table>
     <p class="note">Reach is relative (1–10) because FirstClub's volumes aren't public. Full scoring is in the <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/docs/PRD_make-it-right.md">PRD</a>.</p>
   </div>

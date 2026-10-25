@@ -1,80 +1,103 @@
 # PRD: Make it right in one tap
 
-**Author:** Aakash Mishra · **Status:** Proposal (outside-in, built on public data) · **Project area:** Customer retention · **Date:** October 2026
+**Protecting a customer's first five orders: prevent the bad ones, fix the rest in one tap**
+
+**Author:** Aakash Mishra · **Status:** Proposal (outside-in, built on public data and an app walkthrough) · **Project area:** Customer retention · **Date:** October 2026
 
 ## Problem (in 3 sentences)
-FirstClub wins customers on quality: freshness comes up in 66% of its 1,149 positive Play Store reviews. When an order goes wrong (a missing milk packet, a stale loaf, a late slot), fixing it means a support chat, and a failure review that also complains about support signals the customer is leaving 3.4x as often as one that doesn't (24.2% vs 7.2%). As FirstClub scaled, the average rating of new written reviews fell from 4.37 (Jan–May 2026) to 3.92 (Jun–Oct 2026), so the cost of a slow fix is growing.
+FirstClub wins customers on quality: freshness comes up in 66% of its 1,149 positive Play Store reviews. When an order goes wrong (a missing milk packet, a stale loaf, a late slot), fixing it means a support conversation, and a failure review that also complains about support signals the customer is leaving 3.4x as often as one that doesn't (24.2% vs 7.2%). As FirstClub scaled, the average rating of new written reviews fell from 4.37 (Jan–May 2026) to 3.92 (Jun–Oct 2026), so every slow fix costs more.
 
 ## Evidence
 | Signal | Source | Number |
 |---|---|---|
-| Average rating of new written reviews, Jan–May 2026 → Jun–Oct 2026 (overall store rating is still 4.7 across 10,862 ratings) | 2,210 Play Store reviews (`results/r1b_rating_by_period.csv`) | 4.37 → 3.92 |
+| Average rating of new written reviews, Jan–May → Jun–Oct 2026 (the overall store rating is still 4.7 across 10,862 ratings) | 2,210 Play Store reviews (`results/r1b_rating_by_period.csv`) | 4.37 → 3.92 |
 | Share of new reviews rated 1–2★, same periods | same | 13.8% → 24.9% |
 | Failure reviews (order, delivery, payment, quality) that signal churn, **with** a support complaint | 62 reviews (`results/r7_support_vs_churn.csv`) | 24.2% (15) |
 | Same, **without** a support complaint | 167 reviews | 7.2% (12) |
-| Customers who say they're leaving and also complain about support; of those, how many also describe a failure | 54 churn-signal reviews | 19 (35%); 18 of the 19 |
+| First-order reviews that mention quality or freshness | 76 first-order reviews (`results/r5_first_order_reviews.csv`) | 33 |
 | Positive reviews that mention quality or freshness | 1,149 positive reviews (`results/r6_positive_themes.csv`) | 66% |
-| Negative reviews from people who never ordered (serviceability, OTP or login) | 463 negative reviews (`results/r3_primary_theme_by_stage.csv`) | 30% (139) |
-| FirstClub replies to 1–2★ reviews that send the customer to email (Aug–Oct 2026); replies mentioning a self-serve credit | 223 replies (`results/r8_reply_routing.csv`) | 72% (161); 0 |
-| App walkthrough, 26 Oct 2026 ([screenshots](https://gitaakash28.github.io/firstclub-retention-teardown/prototype/)) | Fresh Android install, no past orders | Help = FAQs + an AI assistant; "I want a refund" gets a clarifying question. Signup asks for phone, age and food preferences before showing whether they deliver. |
+| FirstClub replies to 1–2★ reviews sending the customer to email (Aug–Oct 2026); replies mentioning a self-serve credit | 223 replies (`results/r8_reply_routing.csv`) | 72% (161); 0 |
+| "Not serviceable" complaints from people who never ordered: from cities FirstClub doesn't serve; explicitly found out only after entering details | 81 reviews (`results/r9_serviceability_split.csv`) | 25; 24 |
+| App walkthrough, 26 Oct 2026 ([screenshots](https://gitaakash28.github.io/firstclub-retention-teardown/prototype/)) | Fresh Android install, no past orders | Help = FAQs plus an AI assistant; "I want a refund" gets a clarifying question. Signup asks for phone, age and food preferences (each skippable) before showing whether they deliver. |
 
 **In customers' own words:**
 - "First two orders were smooth and quality excellent… From the third one, it has been an ordeal… items missing." (1★, May 2026)
 - "If a packet of milk is not delivered and we try to raise it over chat, your team keeps us engaged for 30 minutes or more." (1★, Jun 2026)
 - "Good experience on my first delivery… I have seen many cases where things start going wrong after the first couple of deliveries. Only time will tell." (5★, May 2026)
 
-**Supporting evidence from public grocery data (Instacart, 3.4M orders from 206K customers, `sql/`):**
-- **Early orders are the fragile ones.** The order history ends after order 4 for 11.6% of customers, vs 5.9% after order 20 (`08_order_to_order`). Only 53.7% of customers with 4 orders have 10 or more observed orders (`01_survival`).
-- **Fresh-heavy first baskets go with longer lives.** 29.6% of customers whose first 3 baskets are 75%+ produce, dairy and bakery have 20+ observed orders, vs 20.6% of those under 25% fresh (`04_fresh_share`). Fresh quality in early orders is the experience to protect.
-- **Slowdowns are detectable.** 46.2% of customers stretch to at least 2× their usual gap at some point, and only 47.3% return to their rhythm on the next order (`05_slowdown_recovery`). This is the trigger for the cadence nudge below.
-- All of this is correlational and comes from a US dataset limited to customers with 4–100 orders, with no churn label: a history that ends may be a newer customer, not a lost one. I use it for direction, not as a FirstClub benchmark.
+**Supporting evidence from public grocery data (Instacart, US, 3.4M orders, `sql/`):** early orders show about twice the drop-off of later ones (the history ends at order 4 for 11.6% of customers vs 5.9% at order 20), and fresh-heavy first baskets go with longer histories (29.6% vs 20.6% reach 20+ orders). This is correlational, with no churn label, so I use it for direction only.
 
-**Takeaway:** quality earns the first order. Failures happen at any scale, and what separates the customers who leave is a slow, painful fix. That matters most in the first few orders, before a habit has formed. Caveat: these are review counts, not cohorts. The A/B test below is how to find out whether the link is causal.
+**Takeaway:** quality earns the first order; a slow, effortful fix loses the customer, and the first few orders are where that matters most. These are review counts, not cohorts, which is why the bet ends in an A/B test.
 
-## Goal and metric
-- **Primary metric:** among customers who report an issue in their first 5 orders, the share who place another order within 14 days of reporting it.
-- **Secondary:** median time from report to resolution, post-resolution CSAT, the rating of reviews that mention support.
-- **Guardrails:** refund and credit cost as a percentage of GMV, claims per 100 orders, the share of credits going to customers with 3+ claims (abuse), and support contact rate (it must not rise).
-
-## Users and moment
-New customers in their first 5 orders (habit not yet formed) who hit a missing, wrong or poor-quality item, or a delivery that's late against its promised ETA.
+## Design principles
+1. **Prevent before you compensate.** The best fix is the bad item that never ships.
+2. **Never hold a refund hostage.** For a trust brand, the customer chooses where the money goes, and credits never expire. Two reviewers say they'll leave once their wallet balance runs out, and one calls wallet expiry a "market strategy to make people use more often".
+3. **Trust the customer, verify with your own data.** Approve instantly when pick, pack or delivery data agrees with the claim; ask for a photo only when it doesn't.
+4. **Give the existing AI a button.** FirstClub already runs an AI assistant. A structured entry point beats a blank chat box.
 
 ## Solution
-1. **"Something not right?" on the order card** for 48 hours after delivery. The customer picks the items and a reason (missing, damaged, quality, expired) and gets an **instant wallet credit**, with no chat and no photo for fresh items under a value cap. They can also add a free replacement to their next order.
-2. **Proactive late-delivery credit.** If delivery misses the promised ETA by more than 15 minutes, a small credit and an apology land automatically. The customer doesn't have to ask.
-3. **Use the assistant FirstClub already has.** Repeat claimers (4th in 30 days) go to the existing AI assistant with the order and items already attached, and a person calls back. The button gives the AI structured context instead of a blank chat box.
-4. **Closing the loop.** Every claim is tagged by SKU, batch and dark store and feeds the quality team's daily view. A credit is also a supply-chain signal.
+**A. Prevent: a first-orders quality lane** (ops change, in every dark store)
+- Orders 1–3 for a customer are flagged to the packer: best-in-crate produce, and dairy and bakery must meet a **minimum remaining shelf life** (e.g. 3+ days on milk and bread).
+- The minimum shelf life is shown on product pages ("At least 3 days to best-before, guaranteed") to make the quality promise visible.
 
-**Prototype:** [clickable concept](https://gitaakash28.github.io/firstclub-retention-teardown/prototype/) covering the normal claim, a claim over the cap, a repeat claimer and the automatic late credit.
+**B. Recover: "Something not right?" on the order card** (product change)
+1. For 48 hours after delivery on a customer's first 5 orders, the order card shows **Something not right?** The customer picks the items and a reason (missing, damaged, poor quality, expired).
+2. **Instant approval when FirstClub's own data agrees.** If the item was short-picked or substituted, approve immediately. Otherwise the customer adds one photo, which takes seconds, and approval is still immediate under the value cap.
+3. **The customer chooses the remedy:**
+   - **refund to the original payment method**, labelled honestly as 2–3 days;
+   - **instant credit that never expires**;
+   - **free replacement** in the next order.
+4. **Late delivery:** if delivery misses the promised ETA by 15+ minutes, that order's **delivery and handling fee is refunded automatically**. The cost is bounded and it speaks directly to the fee complaints.
+5. **Repeat claimers (4th in 30 days)** go to the existing **AI assistant with the order and items already attached**, and a person calls back. The customer never re-explains, and the copy never tells them they've been flagged.
+6. **Close the loop.** Every claim is logged by SKU, batch and dark store for the quality team, and the customer later hears what changed ("We pulled that batch of bread from your store").
 
-**Abuse controls:** value cap per order, cap on claims per customer per 30 days, and photo required above the cap or after N claims. Fraud thresholds are set with Ops.
+**C. Say where you deliver, early** (communications, plus a small onboarding change)
+- The Play Store listing and ads name the cities served, and a **city waitlist** captures demand elsewhere (25 of the 81 serviceability complaints came from cities FirstClub doesn't serve).
+- In-city: check the pincode **before** asking for a phone number, with "notify me" for unserved pincodes.
 
-## Out of scope (v1)
-- Repeat customers beyond order 5 (phase 2, if the test wins).
-- Changes to the support chatbot.
-- Subscription (milk) delivery-window issues: separate problem, separate spec.
+**Prototype:** [clickable concept](https://gitaakash28.github.io/firstclub-retention-teardown/prototype/), built next to screenshots of today's app.
+
+## Goal and metrics
+- **Primary (intent to treat):** **early-habit rate**, the share of *all* new customers with 3+ delivered orders within 30 days of their first.
+- **Pre-registered triggered readout:** among customers whose orders 1–5 include an **ops-detected** failure (late by 15+ minutes against the promised ETA, or a short-picked item), the share who reorder within 14 days. These triggers fire the same way in both arms, so the groups are comparable. Bad produce can't be detected this way, so its effect shows up only in the primary metric.
+- **Secondary:** time from report to resolution, post-fix rating, support contact rate.
+- **Guardrails:**
+  - credit and refund cost as a percentage of GMV;
+  - claims per 100 orders;
+  - share of claims from accounts under 7 days old, since the ₹100 welcome offer plus easy credits is an abuse risk;
+  - **promised ETAs must not creep up**, so the late-fee refund doesn't lead ops to pad estimates;
+  - support contact rate must not rise.
 
 ## Experiment design
-- **Hypothesis:** resolving early-order issues in one tap, instead of through chat, raises the 14-day repeat rate of affected customers.
-- **Unit:** customer, randomized 50/50 the first time they hit an issue in orders 1–5. Randomizing by customer rather than by order prevents contamination.
-- **Control:** current support-chat flow. **Treatment:** one-tap credit plus proactive late credit.
-- **Sample size** (`scripts/sample_size.py`, two-sided α = 0.05, power 0.8): if the baseline 14-day repeat rate is 40%, detecting +8 pp needs **604 customers per arm (1,208 total)**; +5 pp needs 1,534 per arm. The baseline is an assumption until a week-1 SQL pull confirms it.
-- **Duration:** the time to collect about 1,200 affected customers, with a minimum of 2 full weeks to cover weekly ordering cycles. Look at the result only at the planned end, not daily.
-- **Decision rule:** ship if the primary metric improves significantly and no guardrail worsens beyond its threshold (e.g. credit cost stays under an agreed percentage of affected-customer GMV). If the lift is positive but not significant, extend once. If it's flat, keep only the proactive late credit and kill the rest.
+- **Why customers are randomized at their first order:** the button itself changes who reports issues. Randomizing only customers who report would compare different kinds of people across the two arms.
+- **Unit:** each new customer, 50/50 at their first order. **Control:** today's help flow. **Treatment:** B (one-tap recovery and the late-fee refund).
+- **Sample size** (`scripts/sample_size.py` → `results/e2_sample_size_itt.csv`; 40% baseline assumed, α = 0.05, power 0.8): if 15–25% of new customers hit an issue in their first 5 orders and recovery lifts them by 8–10 points, the overall lift is 1.2–2.5 points. That needs **6,086–26,289 new customers per arm**. The triggered readout needs far fewer (about 600 per arm for +8 points), so it reads earlier but can't settle the question alone.
+- **Duration:** until the sample is reached, and at least 4 full weeks, since the metric has a 30-day window. Look only at the planned end.
+- **A (prevention) is tested separately, by dark store:** it's an ops process, so roll it out store by store (a staggered rollout) and compare complaint rates on orders 1–3 before and after, against stores not yet switched.
+- **Decision rule:**
+  - **Ship** if the primary metric improves significantly and no guardrail breaches its threshold.
+  - **Triggered readout up but primary flat:** the effect is real but too small to show across all new customers. Keep the late-fee refund and the assistant hand-off, and look at cost.
+  - **Both flat:** kill the credits, but keep the one-tap entry as a better route into support.
 
 ## Prioritization (RICE, outside-in estimates)
-Reach is on a relative 1–10 scale because I don't have FirstClub's volumes. Impact uses the standard 0.25–3 scale, and effort is engineering weeks.
+Reach is relative (1–10) because FirstClub's volumes aren't public. Impact uses the standard 0.25–3 scale, and effort is in weeks.
 
 | Idea | Reach | Impact | Confidence | Effort | RICE | Why |
 |---|---|---|---|---|---|---|
-| Location-first onboarding (check serviceability before login) | 8 | 1 | 90% | 1 | **7.2** | 30% of negative reviews; cheap; ship without a test and track the install → signup funnel |
-| One-tap make-it-right (this PRD) | 6 | 2 | 70% | 3 | **2.8** | Targets the moment reviewers say they leave |
-| Restock nudge timed to each customer's cadence | 7 | 1 | 50% | 2 | **1.8** | Habit builder; depends on the Instacart cadence findings |
+| A. First-orders quality lane | 7 | 2 | 60% | 2 | **4.2** | Every new customer's first 3 orders; prevents the most common first-order complaint (quality in 33 of 76 first-order reviews) |
+| C. Say where you deliver, early | 5 | 1 | 80% | 1 | **4.0** | Cheap; 25 complaints from other cities, 24 from finding out late. The skippable signup screens already soften it |
+| B. One-tap make-it-right | 6 | 2 | 70% | 3 | **2.8** | Targets the moment reviewers say they leave; needs the A/B test |
 
-RICE puts location-first onboarding first, so ship it now as the quick win. It fixes signups, though, not retention. One-tap make-it-right is the **retention** bet, which is why it gets the A/B test.
+**Call:** ship A and C now (an ops process and a communications change, each measured by its own simple before-and-after), and A/B test B, the product bet.
+
+## Out of scope (v1)
+- Customers beyond order 5 (phase 2 if the test wins).
+- Rebuilding the AI assistant; this only gives it a structured entry point.
+- Milk subscription delivery windows: a separate problem and a separate spec.
 
 ## Open questions for the team
-1. What's the real 14-day repeat rate after an early-order issue, and does it depend on fix time? ([`day1_sql/03`](../day1_sql/03_repeat_after_issue_by_resolution.sql), which is ready to run.)
-2. What's today's median time to resolve a missing-item complaint? ([`day1_sql/05`](../day1_sql/05_resolution_time_by_channel.sql))
-3. What credit cap per order keeps the unit economics healthy for each category?
-4. Does a delivered order have its own report-an-issue path? My walkthrough (no past orders) showed FAQs plus an AI assistant, FirstClub's replies point to email (72%), and none mention self-serve credits, but I couldn't test it with a real order.
+1. What's the real 14-day reorder rate after an early-order issue, and does fix time change it? ([`day1_sql/03`](../day1_sql/03_repeat_after_issue_by_resolution.sql))
+2. How long does a fix take today, by channel? ([`day1_sql/05`](../day1_sql/05_resolution_time_by_channel.sql))
+3. What share of new customers hit an issue in their first 5 orders? This sets the A/B sample size. ([`day1_sql/04`](../day1_sql/04_issue_rate_by_order_number.sql))
+4. Does pack data reliably flag short-picks and substitutions? Instant approval depends on it.
+5. Does a delivered order already have a report-an-issue path? My walkthrough had no past orders, so I couldn't test it.

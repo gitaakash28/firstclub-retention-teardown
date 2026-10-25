@@ -26,7 +26,8 @@ CREATE TABLE orders (
   status        TEXT,            -- 'delivered' | 'cancelled'
   gmv           NUMERIC(10,2),
   delivery_fee  NUMERIC(10,2),
-  handling_fee  NUMERIC(10,2)
+  handling_fee  NUMERIC(10,2),
+  short_picked_items INT DEFAULT 0  -- items the packer couldn't fulfil (ops-detected, before any complaint)
 );
 
 CREATE TABLE order_items (
@@ -53,5 +54,5 @@ CREATE TABLE experiment_assignments (
   customer_id   BIGINT REFERENCES customers,
   experiment    TEXT,            -- e.g. 'make_it_right_v1'
   variant       TEXT,            -- 'control' | 'treatment'
-  assigned_at   TIMESTAMP        -- the customer's first early-order issue
+  assigned_at   TIMESTAMP        -- the customer's first order (every new customer is randomized)
 );

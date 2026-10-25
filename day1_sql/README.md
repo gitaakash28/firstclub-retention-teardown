@@ -9,9 +9,9 @@ These are the queries I'd run in my first week on FirstClub's retention project.
 | [03](03_repeat_after_issue_by_resolution.sql) | After an early-order issue, does how fast it's fixed change the 14-day reorder rate? | **The PRD's baseline and core hypothesis** |
 | [04](04_issue_rate_by_order_number.sql) | Are early orders more likely to go wrong? Issues per 100 orders, by order number | Sizes the problem |
 | [05](05_resolution_time_by_channel.sql) | How long does a fix take today, by channel (median, p90, unresolved)? | The "slow fix" the reviews describe |
-| [06](06_slowdown_watchlist.sql) | Which customers are overdue against their own rhythm right now? | Win-back list and the cadence nudge |
+| [06](06_slowdown_watchlist.sql) | Which customers are overdue against their own rhythm right now? | Win-back list |
 | [07](07_signup_funnel_by_pincode.sql) | How many verified signups hit "not serviceable", by pincode? | Sizes the location-first onboarding fix |
-| [08](08_ab_readout.sql) | Make-it-right A/B readout: 14-day reorder lift with a 95% CI, plus credit-cost and claim-rate guardrails | Hypothesis-to-readout, end to end |
+| [08](08_ab_readout.sql) | Make-it-right A/B readout: every new customer randomized at their first order; early-habit lift with a 95% CI, a pre-registered readout on failures FirstClub's own data detects, and cost and claim-rate guardrails | Hypothesis-to-readout, end to end, without selection bias |
 
 ## Tested, not analysed
 FirstClub's data isn't public, so [`make_synthetic.py`](make_synthetic.py) generates FirstClub-shaped data whose behaviour is **pure random noise**: churn, issues and fix times are independent by design. The only purpose is to prove every query runs end to end. [`run_day1.py`](run_day1.py) runs them in DuckDB, and every query also parses as valid Postgres.

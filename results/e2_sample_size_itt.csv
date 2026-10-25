@@ -1,0 +1,5 @@
+baseline,issue_share,lift_among_affected_pp,overall_lift_pp,n_per_arm,n_total
+0.4,0.15,8.0,1.2,26289,52578
+0.4,0.15,10.0,1.5,16844,33688
+0.4,0.25,8.0,2.0,9493,18986
+0.4,0.25,10.0,2.5,6086,12172
