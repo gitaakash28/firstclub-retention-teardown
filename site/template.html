@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FirstClub Retention Teardown</title>
+<meta name="description" content="An outside-in retention teardown of FirstClub: 2,210 Play Store reviews tagged by lifecycle stage, SQL on 3.4M grocery orders, and a PRD with an A/B test plan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf5;
+  --surface: #ffffff;
+  --ink: #14211a;
+  --ink-2: #4a5650;
+  --muted: #7b847f;
+  --line: #e4e6df;
+  --accent: #2f6b45;
+  --accent-soft: #e3eedc;
+  --bar: #2f6b45;
+  --bar-2: #b9c7b1;
+  --warn: #b5482f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121714; --surface: #19201c; --ink: #eef1ec; --ink-2: #c1c9c3; --muted: #8e9891;
+    --line: #2c3530; --accent: #8fc79f; --accent-soft: #223328; --bar: #6fb183; --bar-2: #3d4c42; --warn: #e07a5f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121714; --surface: #19201c; --ink: #eef1ec; --ink-2: #c1c9c3; --muted: #8e9891;
+  --line: #2c3530; --accent: #8fc79f; --accent-soft: #223328; --bar: #6fb183; --bar-2: #3d4c42; --warn: #e07a5f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 "DM Sans", system-ui, sans-serif; }
+main { max-width: 860px; margin: 0 auto; padding: 48px 16px 80px; }
+h1 { font: 400 clamp(2rem, 5vw, 3rem)/1.1 "DM Serif Display", Georgia, serif; margin: 8px 0 16px; }
+h2 { font: 400 1.7rem/1.2 "DM Serif Display", Georgia, serif; margin: 56px 0 8px; }
+h3 { font-size: 1rem; margin: 24px 0 4px; }
+p, li { color: var(--ink-2); }
+a { color: var(--accent); }
+.eyebrow { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.15rem; color: var(--ink); }
+.note { font-size: .85rem; color: var(--muted); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 28px 0; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.tile .label { font-size: .85rem; color: var(--muted); }
+.tile .value { font-size: 1.6rem; font-weight: 700; color: var(--ink); margin-top: 4px; }
+.tile .value small { font-size: .9rem; font-weight: 500; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin: 16px 0; }
+.card h3 { margin-top: 0; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 4px; }
+.links a { text-decoration: none; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: .9rem; font-weight: 500; }
+.links a.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.assume { border: 1px dashed var(--line); border-radius: 12px; padding: 12px 16px; font-size: .92rem; color: var(--ink-2); }
+.finding { border-left: 3px solid var(--accent); padding-left: 14px; margin: 12px 0 0; color: var(--ink); font-weight: 500; }
+.hbar { display: grid; grid-template-columns: minmax(110px, 200px) 1fr 52px; gap: 10px; align-items: center; font-size: .9rem; margin: 6px 0; }
+.hbar .name { color: var(--ink-2); }
+.hbar .track { height: 14px; position: relative; }
+.hbar .fill { height: 100%; background: var(--bar); border-radius: 0 4px 4px 0; min-width: 2px; }
+.hbar .fill.dim { background: var(--bar-2); }
+.hbar .val { text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+.cols { display: flex; align-items: flex-end; gap: 6px; height: 180px; padding-top: 18px; border-bottom: 1px solid var(--line); }
+.col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; position: relative; }
+.col .bar { width: 100%; max-width: 46px; background: var(--bar); border-radius: 4px 4px 0 0; }
+.col .bar.dim { background: var(--bar-2); }
+.col .v { font-size: .75rem; color: var(--ink-2); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.xlabels { display: flex; gap: 6px; }
+.xlabels span { flex: 1; text-align: center; font-size: .72rem; color: var(--muted); }
+.hbar:hover .fill, .col:hover .bar { filter: brightness(1.12); }
+blockquote { margin: 12px 0; padding: 12px 16px; background: var(--accent-soft); border-radius: 10px; color: var(--ink); font-size: .95rem; }
+blockquote cite { display: block; font-size: .8rem; color: var(--muted); font-style: normal; margin-top: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; }
+.pending { border: 1px dashed var(--line); border-radius: 12px; padding: 16px; color: var(--muted); }
+footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
+@media (max-width: 560px) { .hbar { grid-template-columns: 110px 1fr 44px; } .col .v { font-size: .65rem; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Independent case study · Customer retention · October 2026</div>
+  <h1>FirstClub's quality wins the first order. Slow fixes lose the third.</h1>
+  <p class="lede">An outside-in retention teardown by <a href="https://www.linkedin.com/in/aakash-mishra-6379a3270/">Aakash Mishra</a>. It's built on FirstClub's public Play Store reviews, through 24 Oct 2026.</p>
+  <div class="links">
+    <a class="primary" href="prototype/">Try the prototype</a>
+    <a href="pulse/">Live weekly review pulse</a>
+    <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/docs/PRD_make-it-right.md">PRD</a>
+    <a href="https://github.com/gitaakash28/firstclub-retention-teardown/tree/main/day1_sql">Day-1 SQL</a>
+  </div>
+
+  <div class="card">
+    <h3>The problem in 3 sentences</h3>
+    <p>FirstClub wins customers on quality: freshness comes up in <b id="t-pos-quality"></b> of its positive Play Store reviews. When an order goes wrong, the fix runs through a support chat, and a failure review that also complains about support signals the customer is leaving <b id="t-sup-x"></b> as often as one that doesn't (<b id="t-sup-yes"></b> vs <b id="t-sup-no"></b>). As FirstClub scaled, the average rating of new written reviews fell from <b id="t-r-h1"></b> to <b id="t-r-h2"></b> between Jan–May and Jun–Oct 2026, so every slow fix now costs more.</p>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <h2>How I did it</h2>
+  <ol>
+    <li><b>Customer voice.</b> I pulled all <span id="c-reviews"></span> public Google Play reviews (June 2025 – October 2026). An LLM tagged the <span id="c-tagged"></span> reviews with text by <b>lifecycle stage</b> (never ordered, first order, repeat) and <b>theme</b>, using a fixed taxonomy (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/reviews/tagging_prompt.md">prompt</a>). On the 4 themes that can be checked against keywords, tags agreed 96–100% of the time; I also read every churn-flagged review by hand (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/check_tags.py">check</a>). This extends my <a href="https://github.com/gitaakash28/pm-ai-agent">Weekly Pulse agent</a>.</li>
+    <li><b>Day-1 SQL.</b> I wrote the 8 Postgres queries I'd run in my first week against an assumed FirstClub schema. They cover cohorts, repeat rate after an issue by fix time, issue rate by order number, and an A/B readout with a confidence interval and guardrails. They run end to end on synthetic test data, and none of their output is claimed as a finding (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/tree/main/day1_sql">queries</a>).</li>
+    <li><b>Decision.</b> I wrote a PRD with an A/B test plan, RICE-ranked it against two alternatives (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/docs/PRD_make-it-right.md">PRD</a>), and built a <a href="prototype/">clickable prototype</a> of the flow.</li>
+    <li><b>Keeping it current.</b> A weekly GitHub Action pulls new reviews, tags them with the same taxonomy and refreshes a <a href="pulse/">live pulse page</a>. This page stays a fixed snapshot.</li>
+  </ol>
+
+  <h2>1. New reviews turned more critical as FirstClub scaled</h2>
+  <p>Share of new written reviews rated 1–2★, by month (2026). Hover a bar for review count and average rating. The overall store rating is still 4.7 across 10,862 ratings. Written reviews skew critical, so the signal here is the trend, not the level.</p>
+  <div class="card"><div class="cols" id="monthly"></div><div class="xlabels" id="monthly-x"></div></div>
+  <p class="finding" id="f1"></p>
+
+  <h2>2. Where the pain sits in the lifecycle</h2>
+  <p>Negative and mixed reviews (≤3★) by the customer's stage. "Ordered" means the review describes a delivery or product, even when the reviewer doesn't say whether it was their first order.</p>
+  <div class="card" id="stage"></div>
+  <p class="finding">30% of the pain comes before the first order: people find out the app doesn't serve their area only after they've signed up, or they get stuck on the OTP screen. That's a signup leak with a cheap fix. The retention problem is in the reviews from people who ordered.</p>
+  <blockquote>"The app makes you enter all personal details and complete the entire setup, only to state at the very end that service is not available in my location. You should verify address/pincode serviceability at the very first step."<cite>1★, September 2026. The same complaint runs from October 2025 through September 2026.</cite></blockquote>
+
+  <h2>3. What customers who leave talk about</h2>
+  <p>Themes in the <span id="c-churn"></span> reviews where the customer says they uninstalled, stopped ordering or plan to leave. A review can carry up to 3 themes.</p>
+  <div class="card" id="churn"></div>
+  <p class="finding" id="f3"></p>
+  <blockquote>"If a packet of milk is not delivered and we try to raise it over chat, your team keeps us engaged for 30 minutes or more, repeating the same questions again and again."<cite>1★, June 2026</cite></blockquote>
+  <blockquote>"First two orders were smooth and quality excellent… From the third one, it has been an ordeal… items missing."<cite>1★, May 2026</cite></blockquote>
+
+  <h2>4. Why customers stay</h2>
+  <p>Themes in the <span id="c-positive"></span> positive reviews.</p>
+  <div class="card" id="positive"></div>
+  <p class="finding">Quality and freshness dominate the praise. The product promise works. Retention depends on protecting that promise when something slips.</p>
+  <blockquote>"Good experience on my first delivery… I have seen many cases where things start going wrong after the first couple of deliveries. Only time will tell."<cite>5★, May 2026</cite></blockquote>
+
+  <h2>5. What I'd measure on day 1</h2>
+  <p>Reviews tell you what customers say. Orders tell you what they do. These are the queries that turn this case study into FirstClub's own numbers, written in Postgres against an assumed schema that should take an hour to map to the real tables.</p>
+  <div class="card table-wrap"><table>
+    <tr><th>Question</th><th>Why it matters</th></tr>
+    <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/03_repeat_after_issue_by_resolution.sql">After an early-order issue, does fix time change the 14-day reorder rate?</a></td><td>The PRD's baseline and core hypothesis</td></tr>
+    <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/02_first_order_experience.sql">Does a late or complained-about first order lower second-order rates?</a></td><td>Tests "quality wins the first order" on real orders</td></tr>
+    <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/04_issue_rate_by_order_number.sql">Are early orders more likely to go wrong?</a></td><td>Sizes the problem</td></tr>
+    <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/05_resolution_time_by_channel.sql">How long does a fix take today, by channel?</a></td><td>The "slow fix" the reviews describe</td></tr>
+    <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/07_signup_funnel_by_pincode.sql">How many verified signups hit "not serviceable", by pincode?</a></td><td>Sizes the location-first fix</td></tr>
+    <tr><td><a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/01_weekly_cohort_retention.sql">Weekly first-order cohort retention</a> · <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/06_slowdown_watchlist.sql">overdue-customer watchlist</a> · <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/day1_sql/08_ab_readout.sql">A/B readout</a></td><td>The curve, the win-back list, and the readout</td></tr>
+  </table>
+  <p class="note">Tested end to end in DuckDB on synthetic data whose behaviour is random by design; every query also parses as Postgres. No numbers from that test are presented as findings.</p></div>
+
+  <h2>6. The bet: make it right in one tap</h2>
+  <div class="card">
+    <p><b>What:</b> for a customer's first 5 orders, a "Something not right?" button on the order card for 48 hours after delivery. The customer picks the items and gets an instant wallet credit, with no chat and no photo for fresh items under a cap. A small automatic credit also lands when delivery misses the promised ETA by more than 15 minutes. Every claim is tagged by SKU, batch and store and feeds the quality team.</p>
+    <p><b>Primary metric:</b> among customers who report an issue in their first 5 orders, the share who order again within 14 days. <b>Guardrails:</b> credit cost as a percentage of GMV, claims per 100 orders, repeat claimers, and support contact rate.</p>
+    <p><b>Test:</b> randomize 50/50 by customer at their first issue. With an assumed 40% baseline, detecting +8 pp needs 604 customers per arm (1,208 total) at α = 0.05 and 80% power (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/sample_size.py">calculation</a>). Run at least 2 full weeks and look at the result only at the planned end.</p>
+  </div>
+  <div class="links"><a class="primary" href="prototype/">Try the clickable prototype</a></div>
+  <p class="assume"><b>Is this already built? I checked FirstClub's own replies.</b> Of FirstClub's <span id="rr-total"></span> developer replies to 1–2★ reviews from Aug–Oct 2026, <b id="rr-email"></b> ask the customer to email support with their order details, and none mention a self-serve credit or refund (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/reply_routing.py">script</a>). The fix path today runs through email and chat. I haven't used the current app, so I'd still confirm this on day 1.</p>
+  <div class="card table-wrap">
+    <h3>Why this, and what ships alongside it (RICE)</h3>
+    <table>
+      <tr><th>Idea</th><th class="num">RICE</th><th>Call</th></tr>
+      <tr><td>Location-first onboarding (check serviceability before login)</td><td class="num">7.2</td><td>Ship now; no test needed. Fixes the 30% pre-order leak.</td></tr>
+      <tr><td>One-tap make-it-right</td><td class="num">2.8</td><td>The retention bet. A/B test it.</td></tr>
+      <tr><td>Restock nudge timed to each customer's cadence</td><td class="num">1.8</td><td>Next, once early habits are protected.</td></tr>
+    </table>
+    <p class="note">Reach is relative (1–10) because FirstClub's volumes aren't public. Full scoring is in the <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/docs/PRD_make-it-right.md">PRD</a>.</p>
+  </div>
+
+  <h2>Limitations</h2>
+  <ul>
+    <li>Play Store reviewers skew toward strong opinions, and a review is a stated reason, not observed behaviour. The first SQL query I'd run inside FirstClub is the real 14-day repeat rate after an early-order issue.</li>
+    <li>LLM tags are judgments. Theme tags were checked against keyword rules and I read every churn-flagged review, but they're still judgments; the prompt and every tag are public in this repo.</li>
+    <li>I haven't used the current app for this study. FirstClub's own replies (above) suggest there's no self-serve fix path today, but that's the first thing I'd confirm.</li>
+  </ul>
+
+  <h2>Appendix: a US grocery benchmark</h2>
+  <p><b>Why US data at all?</b> FirstClub's order data isn't public, and reviews can't show behaviour. The open Instacart dataset (3.4M orders) is the largest public record of repeat grocery orders, so I used it for general grocery patterns and as a sample of my SQL. But it's US data from scheduled delivery, not 10-minute commerce in Bengaluru, and it has no churn label. Treat it as direction, never as FirstClub's numbers.</p>
+  <div id="sql"></div>
+
+  <footer>
+    Independent work by Aakash Mishra · not affiliated with or endorsed by FirstClub · public data only ·
+    <a href="https://github.com/gitaakash28/firstclub-retention-teardown">source on GitHub</a>
+  </footer>
+</main>
+<script>
+const DATA = /*DATA*/null;
+const $ = (id) => document.getElementById(id);
+const pct = (x) => `${Math.round(x)}%`;
+const find = (arr, key, val) => arr.find((r) => r[key] === val) || {};
+
+const per = Object.fromEntries(DATA.period.map((r) => [r.period, r]));
+const churnRow = (t) => find(DATA.churn, "theme_list", t);
+const posRow = (t) => find(DATA.positive, "theme_list", t);
+$("t-pos-quality").textContent = pct(posRow("quality_freshness").pct);
+const rr = Object.fromEntries((DATA.routing || []).map((r) => [r.route.split(" ")[0], r]));
+if (rr.total) { $("rr-total").textContent = rr.total.replies; $("rr-email").textContent = `${rr.email.replies} (${Math.round(rr.email.pct)}%)`; }
+const supYes = DATA.support.find((r) => r.mentions_support === true), supNo = DATA.support.find((r) => r.mentions_support === false);
+$("t-sup-x").textContent = `${(supYes.pct_churn_signal / supNo.pct_churn_signal).toFixed(1)}x`;
+$("t-sup-yes").textContent = `${supYes.pct_churn_signal}%`;
+$("t-sup-no").textContent = `${supNo.pct_churn_signal}%`;
+$("f3").textContent = `Failures start the exit, and support decides it. Of the ${supYes.reviews + supNo.reviews} negative reviews that describe a failed order, late delivery, payment problem or bad produce, the ${supYes.reviews} that also complain about support signal the customer is leaving ${supYes.pct_churn_signal}% of the time, vs ${supNo.pct_churn_signal}% for the ${supNo.reviews} that don't. These are review counts, not cohorts, so the A/B test below is how to prove it.`;
+$("t-r-h1").textContent = per.H1.avg_rating.toFixed(2);
+$("t-r-h2").textContent = per.H2.avg_rating.toFixed(2);
+["reviews", "tagged", "churn", "positive"].forEach((k) => { const el = $("c-" + k); if (el) el.textContent = DATA.counts[k].toLocaleString("en-IN"); });
+
+const tiles = [
+  ["Average rating of new written reviews, Jan–May → Jun–Oct 2026", `${per.H1.avg_rating.toFixed(2)} → ${per.H2.avg_rating.toFixed(2)}`, ""],
+  ["Share of new reviews rated 1–2★, same periods", `${per.H1.pct_1_2_star.toFixed(1)}% → ${per.H2.pct_1_2_star.toFixed(1)}%`, ""],
+  ["Failure reviews signalling churn: with vs without a support complaint", `${supYes.pct_churn_signal}% vs ${supNo.pct_churn_signal}%`, `n = ${supYes.reviews} / ${supNo.reviews}`],
+  ["Positive reviews that mention quality", pct(posRow("quality_freshness").pct), `of ${DATA.counts.positive.toLocaleString("en-IN")}`],
+];
+$("tiles").innerHTML = tiles.map(([l, v, s]) => `<div class="tile"><div class="label">${l}</div><div class="value">${v} <small>${s}</small></div></div>`).join("");
+
+const months = DATA.monthly.filter((r) => r.month >= "2026-01");
+const max1 = Math.max(...months.map((r) => r.pct_1_2_star));
+$("monthly").innerHTML = months.map((r) => `<div class="col" title="${r.month}: ${r.pct_1_2_star.toFixed(1)}% rated 1–2★ · ${r.reviews} reviews · avg ${r.avg_rating.toFixed(2)}★">
+  <div class="v">${Math.round(r.pct_1_2_star)}%</div><div class="bar ${r.month < "2026-06" ? "dim" : ""}" style="height:${(r.pct_1_2_star / max1) * 82}%"></div></div>`).join("");
+$("monthly-x").innerHTML = months.map((r) => `<span>${new Date(r.month + "-01").toLocaleString("en", { month: "short" })}</span>`).join("");
+$("f1").textContent = `From June, 1–2★ reviews roughly doubled: ${per.H1.pct_1_2_star.toFixed(1)}% of reviews in Jan–May vs ${per.H2.pct_1_2_star.toFixed(1)}% in Jun–Oct, while monthly review volume also doubled (${per.H1.reviews} → ${per.H2.reviews} reviews across the two periods). Growth is outpacing operations.`;
+
+const LABEL = { app_bugs: "App bugs / OTP / login", quality_freshness: "Quality & freshness", serviceability: "Area not serviced",
+  support: "Support", price_value: "Price & value", trust_brand: "Trust & brand promise", delivery_speed: "Delivery speed",
+  ads_comms: "Ads & comms", order_failure: "Failed / missing order", payment_refund: "Payment & refunds", assortment_stock: "Assortment & stock",
+  fees_minimums: "Fees & minimums", packaging_sustainability: "Packaging", subscription_daily: "Milk subscription", general_praise: "General praise", other: "Other",
+  "never ordered": "Never ordered", "ordered, stage unclear": "Ordered (stage unclear)", first_order: "First order", repeat: "Repeat customer", unclear: "Unclear" };
+function hbars(el, rows, nameKey, valKey, fmt, dimFn) {
+  const mx = Math.max(...rows.map((r) => r[valKey]));
+  el.innerHTML = rows.map((r) => `<div class="hbar" title="${LABEL[r[nameKey]] || r[nameKey]}: ${fmt(r[valKey])}">
+    <span class="name">${LABEL[r[nameKey]] || r[nameKey]}</span>
+    <span class="track"><span class="fill ${dimFn && dimFn(r) ? "dim" : ""}" style="display:block;width:${(r[valKey] / mx) * 100}%"></span></span>
+    <span class="val">${fmt(r[valKey])}</span></div>`).join("");
+}
+hbars($("stage"), DATA.stage, "stage", "reviews", (v) => v, (r) => r.stage === "unclear");
+hbars($("churn"), DATA.churn.filter((r) => r.theme_list !== "other").slice(0, 9), "theme_list", "pct", (v) => pct(v), (r) => !["support", "order_failure"].includes(r.theme_list));
+hbars($("positive"), DATA.positive.filter((r) => r.theme_list !== "other").slice(0, 7), "theme_list", "pct", (v) => pct(v), (r) => r.theme_list !== "quality_freshness");
+
+
+const S = DATA.sql;
+if (S["08_order_to_order"]) {
+  const o2o = S["08_order_to_order"].filter((r) => r.order_n <= 30 && r.pct_lost_before_next_order != null);
+  const first = o2o[0], at20 = o2o.find((r) => r.order_n === 20);
+  const surv = Object.fromEntries(S["01_survival"].map((r) => [r.order_n, r]));
+  const cad = S["02_cadence"], fresh = S["04_fresh_share"], slow = S["05_slowdown_recovery"][0], anchors = S["07_anchor_items"];
+  const lo = fresh[0], hi = fresh[fresh.length - 1];
+  const wk = cad[0], mo = cad[2];
+  const mx = Math.max(...o2o.map((r) => r.pct_lost_before_next_order));
+  const CAD = { "1 weekly (<=7d)": "Weekly (≤7 days)", "2 fortnightly (8-14d)": "Fortnightly (8–14)", "3 monthly (15-29d)": "Monthly (15–29)", "4 lapsing (30d+, capped)": "Lapsing (30+)" };
+  const FR = { "1 <25%": "Under 25% fresh", "2 25-50%": "25–50% fresh", "3 50-75%": "50–75% fresh", "4 75%+": "75%+ fresh" };
+  const bars = (rows, nameFn, valKey, hiFn) => { const m = Math.max(...rows.map((r) => r[valKey])); return rows.map((r) =>
+    `<div class="hbar" title="${nameFn(r)}: ${r[valKey]}% · ${r.customers.toLocaleString("en-IN")} customers"><span class="name">${nameFn(r)}</span><span class="track"><span class="fill ${hiFn(r) ? "" : "dim"}" style="display:block;width:${(r[valKey] / m) * 100}%"></span></span><span class="val">${r[valKey].toFixed(1)}%</span></div>`).join(""); };
+  $("sql").innerHTML = `
+  <p class="note">3.4M orders from 206K customers. Every chart links to its query.</p>
+  <h3>Early orders are about twice as fragile as later ones</h3>
+  <p>Share of customers whose order history ends at each order number (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/sql/08_order_to_order.sql">query</a>).</p>
+  <div class="card"><div class="cols">${o2o.map((r) => `<div class="col" title="History ends at order ${r.order_n} for ${r.pct_lost_before_next_order}% · ${r.reached.toLocaleString("en-IN")} customers"><div class="v">${[4, 10, 20, 30].includes(r.order_n) ? r.pct_lost_before_next_order + "%" : ""}</div><div class="bar ${r.order_n <= 8 ? "" : "dim"}" style="height:${(r.pct_lost_before_next_order / mx) * 82}%"></div></div>`).join("")}</div>
+  <div class="xlabels">${o2o.map((r) => `<span>${[4, 10, 20, 30].includes(r.order_n) ? r.order_n : ""}</span>`).join("")}</div></div>
+  <p class="finding">The order history ends at order 4 for ${first.pct_lost_before_next_order}% of customers, vs ${at20.pct_lost_before_next_order}% at order 20, and only ${surv[10].pct_reaching}% of customers with 4 orders have 10 or more. (The dataset only includes customers with 4+ orders, so orders 1–3, which are probably even riskier, can't be measured here.)</p>
+  <h3>Fresh-heavy first baskets go with longer lives</h3>
+  <p>Share with 20+ observed orders, by how much of the first 3 baskets is produce, dairy & eggs and bakery: FirstClub's core categories (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/sql/04_fresh_share.sql">query</a>).</p>
+  <div class="card">${bars(fresh, (r) => FR[r.fresh_band], "pct_reaching_20_orders", (r) => r === hi)}</div>
+  <p class="finding">Customers whose early baskets are ${hi.fresh_band.slice(2)} fresh have 20+ observed orders ${hi.pct_reaching_20_orders}% of the time, vs ${lo.pct_reaching_20_orders}% for those ${lo.fresh_band.slice(2)} fresh. That's a correlation, not proof of cause, but it means fresh quality in the first orders is the experience FirstClub can least afford to get wrong.</p>
+  <h3>Rhythm is the habit</h3>
+  <p>Share with 20+ observed orders, by the customer's typical gap between orders (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/sql/02_cadence.sql">query</a>).</p>
+  <div class="card">${bars(cad, (r) => CAD[r.cadence], "pct_reaching_20_orders", (r) => r === wk)}</div>
+  <p class="finding">${wk.pct_reaching_20_orders}% of weekly shoppers have 20+ observed orders, vs ${mo.pct_reaching_20_orders}% of monthly shoppers. Part of this is built in (a shorter gap fits more orders into the window), but the gap matters: ${slow.pct_customers_with_slowdown}% of customers slow down at least once to 2× their usual gap, and only ${slow.pct_next_gap_back_to_normal}% get back to their rhythm on the next order (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/sql/05_slowdown_recovery.sql">query</a>). A slowdown can be detected and acted on.</p>
+  <h3>The first basket hints at who stays</h3>
+  <p>Fresh items in a customer's first order, ranked by how often those customers have 10+ observed orders (minimum 2,000 buyers; overall rate ${anchors[0].pct_all_customers}%, <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/sql/07_anchor_items.sql">query</a>).</p>
+  <div class="card table-wrap"><table><tr><th>First-order item</th><th class="num">Buyers</th><th class="num">10+ orders</th></tr>
+  ${anchors.slice(0, 8).map((r) => `<tr><td>${r.product_name}</td><td class="num">${r.first_order_buyers.toLocaleString("en-IN")}</td><td class="num">${r.pct_reaching_10_orders.toFixed(1)}%</td></tr>`).join("")}</table>
+  <p class="note">Every item on the list is a fresh staple, most of them organic, and their buyers have 10+ observed orders ${Math.round(Math.min(...anchors.slice(0, 8).map((r) => r.pct_reaching_10_orders)) - anchors[0].pct_all_customers)}–${Math.round(Math.max(...anchors.slice(0, 8).map((r) => r.pct_reaching_10_orders)) - anchors[0].pct_all_customers)} points more often than the average customer. It's the same quality-seeking customer FirstClub is built for.</p></div>`;
+}
+
+if (!Object.values(DATA.sql).some(Boolean)) {
+  $("sql").innerHTML = `<div class="pending">SQL results are being added.</div>`;
+}
+</script>
+</body>
+</html>

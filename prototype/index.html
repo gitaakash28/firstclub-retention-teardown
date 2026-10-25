@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Make-It-Right Prototype</title>
+<meta name="description" content="Clickable concept prototype of a one-tap fix flow for early grocery orders, from the FirstClub retention teardown.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f1f0ea; --surface: #ffffff; --ink: #14211a; --ink-2: #4a5650; --muted: #7b847f; --line: #e4e6df;
+  --accent: #2f6b45; --accent-ink: #ffffff; --accent-soft: #e3eedc; --warn-soft: #fbeee6; --warn: #a4462c;
+  --phone: #ffffff; --phone-edge: #1d2420;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101411; --surface: #19201c; --ink: #eef1ec; --ink-2: #c1c9c3; --muted: #8e9891; --line: #2c3530;
+    --accent: #8fc79f; --accent-ink: #0f1a13; --accent-soft: #223328; --warn-soft: #3a2620; --warn: #f0a58c;
+    --phone: #151b17; --phone-edge: #000000;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101411; --surface: #19201c; --ink: #eef1ec; --ink-2: #c1c9c3; --muted: #8e9891; --line: #2c3530;
+  --accent: #8fc79f; --accent-ink: #0f1a13; --accent-soft: #223328; --warn-soft: #3a2620; --warn: #f0a58c;
+  --phone: #151b17; --phone-edge: #000000;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "DM Sans", system-ui, sans-serif; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; display: grid; grid-template-columns: 380px 1fr; gap: 40px; align-items: start; }
+@media (max-width: 860px) { .wrap { grid-template-columns: 1fr; justify-items: center; } .notes { max-width: 420px; } }
+.phone { width: 360px; max-width: 100%; height: 720px; border: 10px solid var(--phone-edge); border-radius: 40px; background: var(--phone); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.status { display: flex; justify-content: space-between; padding: 10px 20px 4px; font-size: 12px; color: var(--muted); }
+.screen { flex: 1; overflow-y: auto; padding: 8px 18px 18px; }
+.appbar { display: flex; align-items: center; gap: 10px; padding: 6px 0 12px; }
+.appbar button { background: none; border: 0; font-size: 20px; color: var(--ink); cursor: pointer; padding: 0 4px; }
+.appbar h2 { margin: 0; font-size: 17px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.muted { color: var(--muted); font-size: 13px; }
+.pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+.btn { width: 100%; padding: 13px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); font: 600 15px "DM Sans", sans-serif; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.item { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.item:last-child { border-bottom: 0; }
+.thumb { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+.item .name { flex: 1; }
+.check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--line); display: grid; place-items: center; color: var(--accent-ink); font-size: 13px; }
+.item.on .check { background: var(--accent); border-color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink-2); font: 500 13px "DM Sans", sans-serif; cursor: pointer; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.option { display: flex; gap: 12px; padding: 12px; border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 8px; cursor: pointer; }
+.option.on { border-color: var(--accent); background: var(--accent-soft); }
+.banner { border-radius: 12px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px; }
+.banner.ok { background: var(--accent-soft); color: var(--ink); }
+.banner.warn { background: var(--warn-soft); color: var(--ink); }
+.big { font: 400 30px/1.1 "DM Serif Display", Georgia, serif; margin: 10px 0 6px; }
+.tick { width: 64px; height: 64px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 30px; margin: 24px auto 8px; }
+.center { text-align: center; }
+.stars { display: flex; justify-content: center; gap: 6px; font-size: 26px; margin-top: 6px; }
+.stars span { cursor: pointer; color: var(--line); }
+.stars span.on { color: #e3a008; }
+.toast { position: absolute; left: 14px; right: 14px; top: 44px; background: var(--ink); color: var(--bg); border-radius: 14px; padding: 12px 14px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; visibility: hidden; transform: translateY(-16px); transition: opacity .3s ease, transform .3s ease, visibility .3s; z-index: 5; }
+.toast.show { opacity: 1; visibility: visible; transform: none; }
+.notes h1 { font: 400 clamp(1.8rem, 4vw, 2.4rem)/1.1 "DM Serif Display", Georgia, serif; margin: 6px 0 10px; }
+.notes p, .notes li { color: var(--ink-2); }
+.eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.scen { display: grid; gap: 8px; margin: 16px 0 24px; }
+.scen button { text-align: left; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 14px "DM Sans", sans-serif; cursor: pointer; }
+.scen button.on { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.scen small { display: block; color: var(--muted); font-weight: 400; }
+.note-step { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; margin: 10px 0; }
+a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone" aria-label="Prototype phone screen">
+    <div class="status"><span>9:41</span><span>Concept prototype</span></div>
+    <div class="toast" id="toast"></div>
+    <div class="screen" id="screen"></div>
+  </div>
+
+  <div class="notes">
+    <div class="eyebrow">Concept prototype · not the FirstClub app</div>
+    <h1>Make it right in one tap</h1>
+    <p>This prototype goes with the <a href="https://gitaakash28.github.io/firstclub-retention-teardown/">FirstClub retention teardown</a> and its <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/docs/PRD_make-it-right.md">PRD</a>. Among failure reviews, the ones that also complain about support signal churn 3.4x as often (24% vs 7%). So the fix has to be faster than the frustration: no chat, no waiting.</p>
+    <p><b>Try a scenario:</b></p>
+    <div class="scen" id="scen">
+      <button data-s="normal" class="on">Missing milk, 3rd order<small>Fresh item under the cap: instant credit, no photo</small></button>
+      <button data-s="cap">Large claim<small>Over ₹400: ask for a photo, credit still instant</small></button>
+      <button data-s="repeat">4th claim in 30 days<small>Abuse guardrail: route to a person, with context pre-filled</small></button>
+      <button data-s="late">Late delivery<small>Missed the ETA by 15+ minutes: automatic credit before they ask</small></button>
+    </div>
+    <div id="explain"></div>
+    <p class="note">Every claim is also logged by SKU, batch and dark store for the quality team. A credit doubles as a supply-chain signal.</p>
+  </div>
+</div>
+
+<script>
+const ITEMS = [
+  { id: "milk", name: "A2 cow milk, 500 ml × 2", price: 98, icon: "🥛", fresh: true },
+  { id: "bread", name: "Sourdough loaf", price: 145, icon: "🍞", fresh: true },
+  { id: "spinach", name: "Spinach, 250 g", price: 39, icon: "🥬", fresh: true },
+  { id: "mango", name: "Alphonso mangoes, 1 kg", price: 449, icon: "🥭", fresh: true },
+  { id: "rice", name: "Sona masoori rice, 5 kg", price: 420, icon: "🍚", fresh: false },
+];
+const REASONS = ["Missing", "Damaged", "Poor quality", "Expired"];
+const CAP = 400;
+const EXPLAIN = {
+  normal: [["Entry point", "A \"Something not right?\" button sits on the order card for 48 hours after delivery, for a customer's first 5 orders. No hunting through the help menu."],
+           ["Pick items, pick a reason", "Two taps. A fresh item under the cap needs no photo, because asking a customer to prove spoiled milk is the trust tax the reviews complain about."],
+           ["Instant credit by default", "The money lands in the wallet before the screen changes. A free replacement in the next order is the alternative, and it builds the next order too."]],
+  cap: [["Cap with a soft landing", "Above ₹400 in a claim, a photo is required, but the credit is still instant once it's added. Cost stays bounded without sending the customer to chat."]],
+  repeat: [["Abuse guardrail", "On the 4th claim in 30 days, the claim goes to a person with the order, items and history pre-filled, so the customer never repeats themselves. This guardrail is tracked in the A/B readout (claims per 100 orders)."]],
+  late: [["Proactive, not reactive", "If delivery misses the promised ETA by 15+ minutes, a small credit and an apology arrive automatically. The customer doesn't have to complain to be made whole."]],
+};
+let S = { scenario: "normal", step: "order", picked: {}, reason: {}, resolution: "credit", stars: 0 };
+const $ = (id) => document.getElementById(id);
+const rupee = (n) => "₹" + n.toLocaleString("en-IN");
+
+function total() { return Object.keys(S.picked).filter((k) => S.picked[k]).reduce((t, k) => t + ITEMS.find((i) => i.id === k).price, 0); }
+function ready() { const ks = Object.keys(S.picked).filter((k) => S.picked[k]); return ks.length && ks.every((k) => S.reason[k]); }
+
+function toast(msg) { const t = $("toast"); t.innerHTML = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3800); }
+
+function render() {
+  const sc = $("screen");
+  if (S.step === "order") {
+    sc.innerHTML = `
+      <div class="appbar"><h2>Your orders</h2></div>
+      <div class="card">
+        <div class="row"><b>Order #1042</b><span class="pill">${S.scenario === "late" ? "Delivered · 22 min late" : "Delivered · 18 min ago"}</span></div>
+        <div class="muted">5 items · ${rupee(1151)} · your 3rd order</div>
+        <div style="margin:10px 0 12px;font-size:22px">🥛 🍞 🥬 🥭 🍚</div>
+        ${S.scenario === "late" ? `<div class="banner ok">₹30 credit added for the late delivery. Sorry, that's on us.</div>` : ""}
+        <button class="btn" id="go">Something not right?</button>
+        <div class="muted center" style="margin-top:6px">Available for 48 hours after delivery</div>
+      </div>
+      <div class="card"><div class="row"><b>Order #0987</b><span class="muted">6 days ago</span></div><div class="muted">7 items · ${rupee(1630)}</div></div>`;
+    $("go").onclick = () => { S.step = "pick"; render(); };
+    if (S.scenario === "late") setTimeout(() => toast("<b>₹30 added to your wallet</b><br>Order #1042 arrived 22 min after the promised time. No need to ask."), 300);
+  }
+  if (S.step === "pick") {
+    sc.innerHTML = `
+      <div class="appbar"><button id="back" aria-label="Back">←</button><h2>What wasn't right?</h2></div>
+      <div class="card">${ITEMS.map((i) => `
+        <div class="item ${S.picked[i.id] ? "on" : ""}" data-id="${i.id}">
+          <div class="thumb">${i.icon}</div>
+          <div class="name">${i.name}<div class="muted">${rupee(i.price)}</div>
+            ${S.picked[i.id] ? `<div class="chips">${REASONS.map((r) => `<button class="chip ${S.reason[i.id] === r ? "on" : ""}" data-r="${r}" data-id="${i.id}">${r}</button>`).join("")}</div>` : ""}
+          </div>
+          <div class="check">${S.picked[i.id] ? "✓" : ""}</div>
+        </div>`).join("")}</div>
+      ${total() > CAP ? `<div class="banner warn">Claims over ${rupee(CAP)} need one photo. Your credit is still instant.</div>` : ""}
+      <button class="btn" id="next" ${ready() ? "" : "disabled"}>Continue${total() ? " · " + rupee(total()) : ""}</button>`;
+    $("back").onclick = () => { S.step = "order"; render(); };
+    sc.querySelectorAll(".item").forEach((el) => el.onclick = (e) => { if (e.target.classList.contains("chip")) return; S.picked[el.dataset.id] = !S.picked[el.dataset.id]; render(); });
+    sc.querySelectorAll(".chip").forEach((el) => el.onclick = (e) => { e.stopPropagation(); S.reason[el.dataset.id] = el.dataset.r; render(); });
+    $("next").onclick = () => { S.step = S.scenario === "repeat" ? "agent" : (total() > CAP ? "photo" : "resolve"); render(); };
+  }
+  if (S.step === "photo") {
+    sc.innerHTML = `
+      <div class="appbar"><button id="back" aria-label="Back">←</button><h2>Add one photo</h2></div>
+      <div class="card center" style="padding:36px 14px"><div style="font-size:40px">📷</div><p class="muted">Claims over ${rupee(CAP)} need one photo of the items. Your credit lands the moment it’s added.</p>
+      <button class="btn ghost" id="snap">Take photo</button></div>
+      <button class="btn" id="next" disabled>Continue</button>`;
+    $("back").onclick = () => { S.step = "pick"; render(); };
+    $("snap").onclick = () => { $("snap").textContent = "✓ Photo added"; $("next").disabled = false; };
+    $("next").onclick = () => { S.step = "resolve"; render(); };
+  }
+  if (S.step === "resolve") {
+    sc.innerHTML = `
+      <div class="appbar"><button id="back" aria-label="Back">←</button><h2>How should we fix it?</h2></div>
+      <div class="option ${S.resolution === "credit" ? "on" : ""}" data-v="credit"><div style="font-size:22px">💳</div><div><b>Instant wallet credit · ${rupee(total())}</b><div class="muted">Lands now. Use it on any order.</div></div></div>
+      <div class="option ${S.resolution === "replace" ? "on" : ""}" data-v="replace"><div style="font-size:22px">🔁</div><div><b>Free replacement</b><div class="muted">Added to your next order at no cost.</div></div></div>
+      <button class="btn" id="next" style="margin-top:8px">Confirm</button>`;
+    $("back").onclick = () => { S.step = "pick"; render(); };
+    sc.querySelectorAll(".option").forEach((el) => el.onclick = () => { S.resolution = el.dataset.v; render(); });
+    $("next").onclick = () => { S.step = "done"; render(); };
+  }
+  if (S.step === "agent") {
+    sc.innerHTML = `
+      <div class="appbar"><button id="back" aria-label="Back">←</button><h2>We'll take it from here</h2></div>
+      <div class="card"><b>A person from our team will call you within 30 minutes.</b>
+      <p class="muted">They already have your order, the items and what went wrong, so you won't have to explain it again.</p>
+      <div class="banner warn">Why: this is your 4th report this month. A quick call helps us fix the root cause.</div></div>
+      <button class="btn" id="done">Okay</button>`;
+    $("back").onclick = () => { S.step = "pick"; render(); };
+    $("done").onclick = () => reset(S.scenario);
+  }
+  if (S.step === "done") {
+    sc.innerHTML = `
+      <div class="tick">✓</div>
+      <div class="center"><div class="big">${S.resolution === "credit" ? rupee(total()) + " added" : "Replacement booked"}</div>
+      <div class="muted">${S.resolution === "credit" ? "to your wallet, just now" : "It'll come free with your next order"}</div></div>
+      <div class="card" style="margin-top:18px"><b>Thanks for telling us.</b><div class="muted">Your report went to the quality team for this store and batch, so it doesn't happen to the next person.</div></div>
+      <div class="card center"><div class="muted">How was this fix?</div><div class="stars">${[1, 2, 3, 4, 5].map((n) => `<span data-n="${n}" class="${n <= S.stars ? "on" : ""}">★</span>`).join("")}</div></div>
+      <button class="btn ghost" id="again">Back to orders</button>`;
+    sc.querySelectorAll(".stars span").forEach((el) => el.onclick = () => { S.stars = +el.dataset.n; render(); });
+    $("again").onclick = () => reset(S.scenario);
+  }
+}
+
+function reset(s) {
+  S = { scenario: s, step: "order", picked: {}, reason: {}, resolution: "credit", stars: 0 };
+  if (s === "cap") { S.picked = { mango: true, bread: true }; S.reason = { mango: "Poor quality", bread: "Expired" }; }
+  if (s === "normal") { S.picked = {}; }
+  document.querySelectorAll("#scen button").forEach((b) => b.classList.toggle("on", b.dataset.s === s));
+  $("explain").innerHTML = (EXPLAIN[s] || []).map(([h, t]) => `<div class="note-step"><b>${h}</b><br>${t}</div>`).join("");
+  render();
+}
+document.querySelectorAll("#scen button").forEach((b) => b.onclick = () => reset(b.dataset.s));
+reset("normal");
+</script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+n_treatment,n_control,pct_reorder_14d_treatment,pct_reorder_14d_control,lift_pp,ci95_low_pp,ci95_high_pp,guardrail_credit_pct_gmv_treatment,guardrail_credit_pct_gmv_control,guardrail_claims_per_100_orders_treatment,guardrail_claims_per_100_orders_control
+476,451,60.1,62.1,-2.0,-8.3,4.3,10.52,10.34,7.9,6.9

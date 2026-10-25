@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FirstClub Review Pulse</title>
+<meta name="description" content="A weekly, automatically refreshed read of FirstClub's public Play Store reviews: rating trend, complaint themes and the latest critical reviews.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbfaf5; --surface: #ffffff; --ink: #14211a; --ink-2: #4a5650; --muted: #7b847f; --line: #e4e6df;
+  --accent: #2f6b45; --accent-soft: #e3eedc; --bar: #2f6b45; --bar-2: #b9c7b1; --up: #a4462c; --down: #2f6b45;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121714; --surface: #19201c; --ink: #eef1ec; --ink-2: #c1c9c3; --muted: #8e9891; --line: #2c3530;
+    --accent: #8fc79f; --accent-soft: #223328; --bar: #6fb183; --bar-2: #3d4c42; --up: #f0a58c; --down: #8fc79f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121714; --surface: #19201c; --ink: #eef1ec; --ink-2: #c1c9c3; --muted: #8e9891; --line: #2c3530;
+  --accent: #8fc79f; --accent-soft: #223328; --bar: #6fb183; --bar-2: #3d4c42; --up: #f0a58c; --down: #8fc79f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 "DM Sans", system-ui, sans-serif; }
+main { max-width: 860px; margin: 0 auto; padding: 40px 16px 72px; }
+h1 { font: 400 clamp(1.9rem, 5vw, 2.6rem)/1.1 "DM Serif Display", Georgia, serif; margin: 6px 0 10px; }
+h2 { font: 400 1.5rem/1.2 "DM Serif Display", Georgia, serif; margin: 44px 0 8px; }
+p { color: var(--ink-2); }
+a { color: var(--accent); }
+.eyebrow { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 24px 0; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.tile .label { font-size: .82rem; color: var(--muted); }
+.tile .value { font-size: 1.5rem; font-weight: 700; margin-top: 2px; }
+.tile .delta { font-size: .85rem; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin: 14px 0; }
+.cols { display: flex; align-items: flex-end; gap: 4px; height: 160px; padding-top: 18px; border-bottom: 1px solid var(--line); }
+.col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.col .bar { width: 100%; max-width: 34px; background: var(--bar-2); border-radius: 4px 4px 0 0; }
+.col:last-child .bar { background: var(--bar); }
+.col .v { font-size: .68rem; color: var(--ink-2); margin-bottom: 3px; }
+.xlabels { display: flex; gap: 4px; }
+.xlabels span { flex: 1; text-align: center; font-size: .66rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 500; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.up { color: var(--up); } .down { color: var(--down); }
+blockquote { margin: 10px 0; padding: 12px 16px; background: var(--accent-soft); border-radius: 10px; color: var(--ink); font-size: .94rem; }
+blockquote cite { display: block; font-size: .78rem; color: var(--muted); font-style: normal; margin-top: 4px; }
+.note { font-size: .85rem; color: var(--muted); }
+footer { margin-top: 56px; font-size: .85rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Refreshed weekly by a GitHub Action · public reviews only</div>
+  <h1>FirstClub Review Pulse</h1>
+  <p id="lede"></p>
+  <div class="tiles" id="tiles"></div>
+
+  <h2>Weekly share of new reviews rated 1–2★</h2>
+  <p>Last 16 weeks. The darkest bar is the current week, which may be partial. Hover a bar for that week's review count and average rating.</p>
+  <div class="card"><div class="cols" id="weeks"></div><div class="xlabels" id="weeks-x"></div></div>
+
+  <h2>What negative reviews are about</h2>
+  <p id="theme-lede"></p>
+  <div class="card" style="overflow-x:auto"><table id="themes"></table></div>
+
+
+  <p class="note">This page tracks the problem described in the <a href="../">FirstClub retention teardown</a>, which is a fixed snapshot of reviews through 24 Oct 2026. Here, the job pulls new Play Store reviews every Monday, tags them with the same <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/reviews/tagging_prompt.md">taxonomy</a> using an LLM, and rebuilds this page (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/.github/workflows/weekly-pulse.yml">workflow</a>). Written reviews skew critical; the trend matters more than the level. Verbatim reviews aren't reposted here because the page publishes without a human check. Reviews up to 24 Oct 2026 were tagged in one pass for the case study and later ones by the weekly job, so small theme shifts around that date may be tagging noise.</p>
+  <footer>Independent work by Aakash Mishra · not affiliated with or endorsed by FirstClub</footer>
+</main>
+<script>
+const D = {"kpi": {"as_of": "24 Oct 2026", "total": 2210, "last_n": 435, "last_avg": 3.79, "prev_avg": 3.95, "last_low": 27.6, "prev_low": 23.4, "tagged": 1714}, "weeks": [{"week": "2026-07-06", "reviews": 68, "avg_rating": 4.21, "pct_1_2_star": 17.65}, {"week": "2026-07-13", "reviews": 58, "avg_rating": 3.74, "pct_1_2_star": 32.76}, {"week": "2026-07-20", "reviews": 32, "avg_rating": 4.06, "pct_1_2_star": 21.88}, {"week": "2026-07-27", "reviews": 53, "avg_rating": 4.15, "pct_1_2_star": 22.64}, {"week": "2026-08-03", "reviews": 55, "avg_rating": 4.07, "pct_1_2_star": 21.82}, {"week": "2026-08-10", "reviews": 63, "avg_rating": 4.11, "pct_1_2_star": 19.05}, {"week": "2026-08-17", "reviews": 48, "avg_rating": 4.6, "pct_1_2_star": 10.42}, {"week": "2026-08-24", "reviews": 50, "avg_rating": 3.74, "pct_1_2_star": 32.0}, {"week": "2026-08-31", "reviews": 57, "avg_rating": 4.18, "pct_1_2_star": 14.04}, {"week": "2026-09-07", "reviews": 70, "avg_rating": 3.69, "pct_1_2_star": 31.43}, {"week": "2026-09-14", "reviews": 78, "avg_rating": 3.87, "pct_1_2_star": 25.64}, {"week": "2026-09-21", "reviews": 99, "avg_rating": 3.92, "pct_1_2_star": 23.23}, {"week": "2026-09-28", "reviews": 121, "avg_rating": 3.77, "pct_1_2_star": 27.27}, {"week": "2026-10-05", "reviews": 91, "avg_rating": 3.88, "pct_1_2_star": 24.18}, {"week": "2026-10-12", "reviews": 106, "avg_rating": 3.76, "pct_1_2_star": 29.25}, {"week": "2026-10-19", "reviews": 68, "avg_rating": 3.94, "pct_1_2_star": 26.47}], "themes": [{"theme": "serviceability", "last": 34, "prev": 10, "last_pct": 26.6, "prev_pct": 14.5}, {"theme": "app_bugs", "last": 30, "prev": 21, "last_pct": 23.4, "prev_pct": 30.4}, {"theme": "support", "last": 23, "prev": 11, "last_pct": 18.0, "prev_pct": 15.9}, {"theme": "quality_freshness", "last": 22, "prev": 10, "last_pct": 17.2, "prev_pct": 14.5}, {"theme": "price_value", "last": 17, "prev": 11, "last_pct": 13.3, "prev_pct": 15.9}, {"theme": "ads_comms", "last": 15, "prev": 11, "last_pct": 11.7, "prev_pct": 15.9}, {"theme": "delivery_speed", "last": 14, "prev": 8, "last_pct": 10.9, "prev_pct": 11.6}, {"theme": "trust_brand", "last": 11, "prev": 6, "last_pct": 8.6, "prev_pct": 8.7}], "neg_last": 128, "neg_prev": 69};
+const $ = (id) => document.getElementById(id);
+const K = D.kpi;
+const LABEL = { app_bugs: "App bugs / OTP / login", quality_freshness: "Quality & freshness", serviceability: "Area not serviced", support: "Support",
+  price_value: "Price & value", trust_brand: "Trust & brand promise", delivery_speed: "Delivery speed", ads_comms: "Ads & comms",
+  order_failure: "Failed / missing order", payment_refund: "Payment & refunds", assortment_stock: "Assortment & stock", fees_minimums: "Fees & minimums",
+  packaging_sustainability: "Packaging", subscription_daily: "Milk subscription" };
+const arrow = (now, before, higherIsBad) => {
+  if (now == null || before == null) return "";
+  const d = now - before; if (Math.abs(d) < 0.005) return "flat vs previous 4 weeks";
+  const bad = higherIsBad ? d > 0 : d < 0;
+  return `<span class="${bad ? "up" : "down"}">${d > 0 ? "▲" : "▼"} ${Math.abs(d).toFixed(higherIsBad ? 1 : 2)}</span> vs previous 4 weeks`;
+};
+$("lede").textContent = `As of ${K.as_of}: ${K.total.toLocaleString("en-IN")} public Google Play reviews tracked, ${K.tagged.toLocaleString("en-IN")} tagged by lifecycle stage and theme.`;
+$("tiles").innerHTML = [
+  ["New reviews, last 4 weeks", K.last_n, ""],
+  ["Average rating of new reviews", K.last_avg != null ? K.last_avg.toFixed(2) + "★" : "–", arrow(K.last_avg, K.prev_avg, false)],
+  ["Share rated 1–2★", K.last_low != null ? K.last_low.toFixed(1) + "%" : "–", arrow(K.last_low, K.prev_low, true)],
+].map(([l, v, d]) => `<div class="tile"><div class="label">${l}</div><div class="value">${v}</div><div class="delta">${d}</div></div>`).join("");
+
+const mx = Math.max(...D.weeks.map((w) => w.pct_1_2_star), 1);
+$("weeks").innerHTML = D.weeks.map((w) => `<div class="col" title="Week of ${w.week}: ${w.pct_1_2_star.toFixed(1)}% rated 1–2★ · ${w.reviews} reviews · avg ${w.avg_rating.toFixed(2)}★"><div class="v">${Math.round(w.pct_1_2_star)}%</div><div class="bar" style="height:${(w.pct_1_2_star / mx) * 82}%"></div></div>`).join("");
+$("weeks-x").innerHTML = D.weeks.map((w, i) => `<span>${i % 2 === 0 ? new Date(w.week).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : ""}</span>`).join("");
+
+if (D.themes.length) {
+  $("theme-lede").textContent = `Share of negative reviews mentioning each theme: last 4 weeks (${D.neg_last} reviews) vs the 4 weeks before (${D.neg_prev}). A review can carry up to 3 themes.`;
+  $("themes").innerHTML = `<tr><th>Theme</th><th class="num">Last 4 weeks</th><th class="num">Previous 4</th><th class="num">Change</th></tr>` +
+    D.themes.map((t) => { const d = t.last_pct - t.prev_pct; return `<tr><td>${LABEL[t.theme] || t.theme}</td><td class="num">${t.last_pct.toFixed(1)}%</td><td class="num">${t.prev_pct.toFixed(1)}%</td><td class="num ${d > 0 ? "up" : "down"}">${d > 0 ? "+" : ""}${d.toFixed(1)} pp</td></tr>`; }).join("");
+} else {
+  $("theme-lede").textContent = "Theme tagging runs when the LLM key is configured; no tagged negative reviews in this window yet.";
+}
+</script>
+</body>
+</html>

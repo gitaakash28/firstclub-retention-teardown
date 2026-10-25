@@ -1,0 +1,9 @@
+data/instacart/
+data/*.duckdb
+.DS_Store
+__pycache__/
+day1_sql/synthetic/
+
+# secrets: never commit
+*.env
+.env*

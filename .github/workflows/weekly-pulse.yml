@@ -1,0 +1,34 @@
+name: Weekly review pulse
+
+on:
+  schedule:
+    - cron: "30 3 * * 1"   # Mondays 09:00 IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Pull new Play Store reviews
+        run: python scripts/scrape_reviews.py data/live/reviews.csv
+      - name: Tag new reviews (skipped if GROQ_API_KEY is not set)
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python scripts/tag_new_reviews.py
+      - name: Rebuild the pulse page
+        run: python scripts/build_pulse.py
+      - name: Commit if anything changed
+        run: |
+          git config user.name "pulse-bot"
+          git config user.email "pulse-bot@users.noreply.github.com"
+          git add data/live reviews/live_tags.csv pulse/index.html
+          git diff --cached --quiet || git commit -m "Weekly pulse: $(date -u +%Y-%m-%d)"
+          git push

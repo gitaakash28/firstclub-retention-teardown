@@ -1,0 +1,5 @@
+resolution_time,customers,pct_reorder_within_14d
+1 under 1 hour,167,63.5
+2 1-24 hours,636,60.4
+3 over 24 hours,52,57.7
+4 unresolved,72,63.9

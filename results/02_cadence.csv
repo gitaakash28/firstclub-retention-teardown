@@ -1,0 +1,5 @@
+cadence,customers,pct_customers,median_lifetime_orders,pct_reaching_20_orders
+1 weekly (<=7d),52554,25.5,26.0,59.4
+2 fortnightly (8-14d),63222,30.7,14.0,33.1
+3 monthly (15-29d),61192,29.7,8.0,2.9
+"4 lapsing (30d+, capped)",29241,14.2,5.0,0.0
