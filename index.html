@@ -89,7 +89,7 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
   <h1>FirstClub's quality wins the first order. Slow fixes lose the third.</h1>
   <p class="lede">An outside-in retention teardown by <a href="https://www.linkedin.com/in/aakash-mishra-6379a3270/">Aakash Mishra</a>. It's built on FirstClub's public Play Store reviews, through 24 Oct 2026.</p>
   <div class="links">
-    <a class="primary" href="prototype/">Try the prototype</a>
+    <a class="primary" href="prototype/">Today vs proposed: try the prototype</a>
     <a href="pulse/">Live weekly review pulse</a>
     <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/docs/PRD_make-it-right.md">PRD</a>
     <a href="https://github.com/gitaakash28/firstclub-retention-teardown/tree/main/day1_sql">Day-1 SQL</a>
@@ -154,7 +154,7 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
     <p><b>Test:</b> randomize 50/50 by customer at their first issue. With an assumed 40% baseline, detecting +8 pp needs 604 customers per arm (1,208 total) at α = 0.05 and 80% power (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/sample_size.py">calculation</a>). Run at least 2 full weeks and look at the result only at the planned end.</p>
   </div>
   <div class="links"><a class="primary" href="prototype/">Try the clickable prototype</a></div>
-  <p class="assume"><b>Is this already built? I checked FirstClub's own replies.</b> Of FirstClub's <span id="rr-total"></span> developer replies to 1–2★ reviews from Aug–Oct 2026, <b id="rr-email"></b> ask the customer to email support with their order details, and none mention a self-serve credit or refund (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/reply_routing.py">script</a>). The fix path today runs through email and chat. I haven't used the current app, so I'd still confirm this on day 1.</p>
+  <p class="assume"><b>Is this already built? I checked FirstClub's own replies.</b> Of FirstClub's <span id="rr-total"></span> developer replies to 1–2★ reviews from Aug–Oct 2026, <b id="rr-email"></b> ask the customer to email support with their order details, and none mention a self-serve credit or refund (<a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/scripts/reply_routing.py">script</a>). In a walkthrough of the app on 26 Oct 2026, help was FAQs plus an AI assistant, and asking it for a refund started a back-and-forth (<a href="prototype/">screenshots</a>). So the concept gives that assistant a button: one tap on the order hands it the items and the problem. I had no past orders, so the order-level help path is the one thing I couldn't check.</p>
   <div class="card table-wrap">
     <h3>Why this, and what ships alongside it (RICE)</h3>
     <table>
@@ -170,7 +170,7 @@ footer { margin-top: 64px; font-size: .85rem; color: var(--muted); }
   <ul>
     <li>Play Store reviewers skew toward strong opinions, and a review is a stated reason, not observed behaviour. The first SQL query I'd run inside FirstClub is the real 14-day repeat rate after an early-order issue.</li>
     <li>LLM tags are judgments. Theme tags were checked against keyword rules and I read every churn-flagged review, but they're still judgments; the prompt and every tag are public in this repo.</li>
-    <li>I haven't used the current app for this study. FirstClub's own replies (above) suggest there's no self-serve fix path today, but that's the first thing I'd confirm.</li>
+    <li>I walked through the app on 26 Oct 2026 but had no past orders, so I couldn't see whether a delivered order has its own report-an-issue path. That's the first thing I'd confirm.</li>
   </ul>
 
   <h2>Appendix: a US grocery benchmark</h2>

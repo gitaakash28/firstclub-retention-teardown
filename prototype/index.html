@@ -4,213 +4,319 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Make-It-Right Prototype</title>
-<meta name="description" content="Clickable concept prototype of a one-tap fix flow for early grocery orders, from the FirstClub retention teardown.">
+<meta name="description" content="Concept prototype for FirstClub, built on a walkthrough of the real app: one-tap fixes for early orders, a hand-off to the existing AI assistant, and location-first onboarding.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Serif+Display&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   color-scheme: light;
-  --bg: #f1f0ea; --surface: #ffffff; --ink: #14211a; --ink-2: #4a5650; --muted: #7b847f; --line: #e4e6df;
-  --accent: #2f6b45; --accent-ink: #ffffff; --accent-soft: #e3eedc; --warn-soft: #fbeee6; --warn: #a4462c;
-  --phone: #ffffff; --phone-edge: #1d2420;
+  --bg: #f4f2ea; --surface: #ffffff; --ink: #14211a; --ink-2: #4a5650; --muted: #7b847f; --line: #e2e0d6;
+  --accent: #2f6b45; --accent-soft: #e3eedc;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #101411; --surface: #19201c; --ink: #eef1ec; --ink-2: #c1c9c3; --muted: #8e9891; --line: #2c3530;
-    --accent: #8fc79f; --accent-ink: #0f1a13; --accent-soft: #223328; --warn-soft: #3a2620; --warn: #f0a58c;
-    --phone: #151b17; --phone-edge: #000000;
+    --accent: #8fc79f; --accent-soft: #223328;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #101411; --surface: #19201c; --ink: #eef1ec; --ink-2: #c1c9c3; --muted: #8e9891; --line: #2c3530;
-  --accent: #8fc79f; --accent-ink: #0f1a13; --accent-soft: #223328; --warn-soft: #3a2620; --warn: #f0a58c;
-  --phone: #151b17; --phone-edge: #000000;
+  --accent: #8fc79f; --accent-soft: #223328;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "DM Sans", system-ui, sans-serif; }
-.wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; display: grid; grid-template-columns: 380px 1fr; gap: 40px; align-items: start; }
-@media (max-width: 860px) { .wrap { grid-template-columns: 1fr; justify-items: center; } .notes { max-width: 420px; } }
-.phone { width: 360px; max-width: 100%; height: 720px; border: 10px solid var(--phone-edge); border-radius: 40px; background: var(--phone); overflow: hidden; position: relative; display: flex; flex-direction: column; }
-.status { display: flex; justify-content: space-between; padding: 10px 20px 4px; font-size: 12px; color: var(--muted); }
-.screen { flex: 1; overflow-y: auto; padding: 8px 18px 18px; }
-.appbar { display: flex; align-items: center; gap: 10px; padding: 6px 0 12px; }
-.appbar button { background: none; border: 0; font-size: 20px; color: var(--ink); cursor: pointer; padding: 0 4px; }
-.appbar h2 { margin: 0; font-size: 17px; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
-.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.muted { color: var(--muted); font-size: 13px; }
-.pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 500; }
-.btn { width: 100%; padding: 13px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); font: 600 15px "DM Sans", sans-serif; cursor: pointer; }
-.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
-.btn:disabled { opacity: .4; cursor: not-allowed; }
-.item { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
-.item:last-child { border-bottom: 0; }
-.thumb { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
-.item .name { flex: 1; }
-.check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--line); display: grid; place-items: center; color: var(--accent-ink); font-size: 13px; }
-.item.on .check { background: var(--accent); border-color: var(--accent); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink-2); font: 500 13px "DM Sans", sans-serif; cursor: pointer; }
-.chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.option { display: flex; gap: 12px; padding: 12px; border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 8px; cursor: pointer; }
-.option.on { border-color: var(--accent); background: var(--accent-soft); }
-.banner { border-radius: 12px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px; }
-.banner.ok { background: var(--accent-soft); color: var(--ink); }
-.banner.warn { background: var(--warn-soft); color: var(--ink); }
-.big { font: 400 30px/1.1 "DM Serif Display", Georgia, serif; margin: 10px 0 6px; }
-.tick { width: 64px; height: 64px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 30px; margin: 24px auto 8px; }
-.center { text-align: center; }
-.stars { display: flex; justify-content: center; gap: 6px; font-size: 26px; margin-top: 6px; }
-.stars span { cursor: pointer; color: var(--line); }
-.stars span.on { color: #e3a008; }
-.toast { position: absolute; left: 14px; right: 14px; top: 44px; background: var(--ink); color: var(--bg); border-radius: 14px; padding: 12px 14px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; visibility: hidden; transform: translateY(-16px); transition: opacity .3s ease, transform .3s ease, visibility .3s; z-index: 5; }
-.toast.show { opacity: 1; visibility: visible; transform: none; }
-.notes h1 { font: 400 clamp(1.8rem, 4vw, 2.4rem)/1.1 "DM Serif Display", Georgia, serif; margin: 6px 0 10px; }
-.notes p, .notes li { color: var(--ink-2); }
-.eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.scen { display: grid; gap: 8px; margin: 16px 0 24px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 "DM Sans", system-ui, sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 40px 16px 72px; }
+a { color: var(--accent); }
+h1 { font: 400 clamp(2rem, 5vw, 2.8rem)/1.1 "DM Serif Display", Georgia, serif; margin: 6px 0 12px; }
+h2 { font: 400 1.6rem/1.2 "DM Serif Display", Georgia, serif; margin: 52px 0 6px; }
+h3 { font-size: 1rem; margin: 22px 0 6px; }
+p, li { color: var(--ink-2); }
+.eyebrow { font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.12rem; color: var(--ink); max-width: 760px; }
+.strip { display: flex; gap: 12px; overflow-x: auto; padding: 6px 2px 14px; scroll-snap-type: x mandatory; }
+.shot { flex: 0 0 172px; scroll-snap-align: start; margin: 0; }
+.shot img { width: 172px; height: auto; border-radius: 18px; border: 1px solid var(--line); display: block; background: #fcf7ed; }
+.shot figcaption { font-size: .8rem; color: var(--ink-2); margin-top: 6px; line-height: 1.35; }
+.shot figcaption b { color: var(--ink); }
+.finding { border-left: 3px solid var(--accent); padding: 2px 0 2px 14px; color: var(--ink); font-weight: 500; max-width: 820px; }
+.note { font-size: .85rem; color: var(--muted); }
+.demo { display: grid; grid-template-columns: 380px 1fr; gap: 40px; align-items: start; margin-top: 18px; }
+@media (max-width: 880px) { .demo { grid-template-columns: 1fr; justify-items: center; } .notes { max-width: 440px; } }
+.scen { display: grid; gap: 8px; margin: 4px 0 20px; }
 .scen button { text-align: left; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 14px "DM Sans", sans-serif; cursor: pointer; }
 .scen button.on { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
 .scen small { display: block; color: var(--muted); font-weight: 400; }
-.note-step { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; margin: 10px 0; }
-a { color: var(--accent); }
+.note-step { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; margin: 10px 0; color: var(--ink-2); }
+.note-step b { color: var(--ink); }
+
+/* ---------- phone: FirstClub-style UI (colours and type matched from app screenshots) ---------- */
+.phone { --fc-bg: #fcf7ed; --fc-card: #ffffff; --fc-line: #ece4d3; --fc-ink: #1a1a1a; --fc-muted: #7a7466; --fc-green: #019252; --fc-deep: #044123;
+  --fc-peach: #fbeedb; --fc-lime: #cdf2a4; --fc-red: #c8342b;
+  width: 360px; max-width: 100%; height: 740px; border: 10px solid #1d2420; border-radius: 40px; background: var(--fc-bg); overflow: hidden; position: relative;
+  display: flex; flex-direction: column; color: var(--fc-ink); font: 14px/1.45 "Plus Jakarta Sans", system-ui, sans-serif; color-scheme: light; }
+.p-status { display: flex; justify-content: space-between; padding: 9px 20px 2px; font-size: 11px; color: var(--fc-muted); }
+.p-screen { flex: 1; overflow-y: auto; padding: 4px 16px 16px; }
+.p-bar { display: flex; align-items: center; gap: 10px; padding: 8px 0 14px; }
+.p-bar button { background: none; border: 0; font-size: 20px; color: var(--fc-ink); cursor: pointer; padding: 0 4px; }
+.p-title { font: 400 22px/1.15 "Fraunces", Georgia, serif; margin: 0; }
+.p-card { background: var(--fc-card); border: 1px solid var(--fc-line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.p-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.p-muted { color: var(--fc-muted); font-size: 12.5px; }
+.p-tag { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #e3f3e9; color: var(--fc-deep); }
+.p-tag.late { background: #fde8e6; color: var(--fc-red); }
+.p-btn { width: 100%; padding: 13px; border-radius: 14px; border: 0; background: var(--fc-green); color: #fff; font: 600 15px "Plus Jakarta Sans", sans-serif; cursor: pointer; }
+.p-btn.ghost { background: transparent; color: var(--fc-deep); border: 1.5px solid var(--fc-deep); }
+.p-btn:disabled { opacity: .35; cursor: not-allowed; }
+.p-thumbs { display: flex; gap: 6px; margin: 10px 0 12px; }
+.p-thumbs img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: #f3ede0; }
+.p-item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--fc-line); cursor: pointer; }
+.p-item:last-child { border-bottom: 0; }
+.p-item img { width: 46px; height: 46px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #f3ede0; }
+.p-item .nm { flex: 1; font-weight: 500; }
+.p-check { width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--fc-line); display: grid; place-items: center; color: #fff; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+.p-item.on .p-check { background: var(--fc-deep); border-color: var(--fc-deep); }
+.p-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.p-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--fc-line); background: #fff; color: var(--fc-ink); font: 500 12.5px "Plus Jakarta Sans", sans-serif; cursor: pointer; }
+.p-chip.on { background: var(--fc-deep); border-color: var(--fc-deep); color: #fff; }
+.p-opt { display: flex; gap: 12px; padding: 13px; border: 1.5px solid var(--fc-line); border-radius: 14px; margin-bottom: 9px; cursor: pointer; background: #fff; width: 100%; text-align: left; font: inherit; color: inherit; }
+.p-opt.on { border-color: var(--fc-green); background: #f1faf4; }
+.p-banner { border-radius: 12px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 12px; background: #e3f3e9; color: var(--fc-deep); }
+.p-banner.warn { background: var(--fc-peach); color: #5b3a12; }
+.p-tick { width: 64px; height: 64px; border-radius: 50%; background: var(--fc-green); color: #fff; display: grid; place-items: center; font-size: 30px; margin: 26px auto 10px; }
+.p-big { font: 400 28px/1.15 "Fraunces", Georgia, serif; text-align: center; margin: 4px 0; }
+.p-center { text-align: center; }
+.p-stars { display: flex; justify-content: center; gap: 6px; font-size: 26px; margin-top: 6px; }
+.p-stars span { cursor: pointer; color: #e5dccb; }
+.p-stars span.on { color: #e3a008; }
+.p-nav { display: flex; justify-content: space-around; padding: 8px 6px 10px; border-top: 1px solid var(--fc-line); background: #fff; font-size: 10.5px; color: var(--fc-deep); }
+.p-nav div { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.p-nav div.on { font-weight: 700; }
+.p-nav svg { width: 20px; height: 20px; }
+.p-ai { background: linear-gradient(180deg, var(--fc-lime) 0%, #f7f7e5 45%, var(--fc-bg) 100%); margin: -4px -16px -16px; padding: 4px 16px 16px; min-height: calc(100% + 20px); }
+.p-orb { width: 74px; height: 74px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d9f7b8, #7ccf6e); margin: 18px auto 10px; display: grid; place-items: center; color: #fff; font-size: 30px; }
+.p-bubble { background: var(--fc-peach); border-radius: 16px; padding: 12px 14px; margin: 10px 0; font-size: 13.5px; }
+.p-bubble.me { background: var(--fc-deep); color: #fff; margin-left: 40px; }
+.p-ctx { background: #fff; border: 1px dashed #b9cfa9; border-radius: 12px; padding: 10px 12px; font-size: 12px; color: var(--fc-deep); }
+.p-pin { display: grid; gap: 8px; margin: 14px 0; }
+.p-toast { position: absolute; left: 14px; right: 14px; top: 40px; background: var(--fc-deep); color: #fff; border-radius: 14px; padding: 12px 14px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  opacity: 0; visibility: hidden; transform: translateY(-16px); transition: opacity .3s ease, transform .3s ease, visibility .3s; z-index: 5; }
+.p-toast.show { opacity: 1; visibility: visible; transform: none; }
+footer { margin-top: 56px; font-size: .85rem; color: var(--muted); }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="phone" aria-label="Prototype phone screen">
-    <div class="status"><span>9:41</span><span>Concept prototype</span></div>
-    <div class="toast" id="toast"></div>
-    <div class="screen" id="screen"></div>
+<main>
+  <div class="eyebrow">Concept prototype · built on a walkthrough of the real app (26 Oct 2026) · not affiliated with FirstClub</div>
+  <h1>Make it right in one tap</h1>
+  <p class="lede">FirstClub already has an AI assistant for support. When an item arrives bad today, the customer has to find it and explain what went wrong. This concept puts one button on the order and hands the assistant everything it needs, so most fixes take two taps and no conversation.</p>
+  <p class="note">Part of the <a href="../">FirstClub retention teardown</a> · <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/docs/PRD_make-it-right.md">PRD</a></p>
+
+  <h2>Today, in the real app</h2>
+  <p>Screenshots from a fresh install on Android, 26 Oct 2026. Personal details are hidden.</p>
+
+  <h3>Signing up</h3>
+  <div class="strip">
+    <figure class="shot"><img src="img/today_onb_1_welcome.jpg" alt="FirstClub welcome screen" loading="lazy"><figcaption><b>1</b> Welcome</figcaption></figure>
+    <figure class="shot"><img src="img/today_onb_2_phone.jpg" alt="Phone number entry" loading="lazy"><figcaption><b>2</b> Phone number first</figcaption></figure>
+    <figure class="shot"><img src="img/today_onb_3_age.jpg" alt="Age question" loading="lazy"><figcaption><b>3</b> Age</figcaption></figure>
+    <figure class="shot"><img src="img/today_onb_4_habits.jpg" alt="Food habits and trust preferences" loading="lazy"><figcaption><b>4</b> Food habits and "what builds your trust"</figcaption></figure>
+    <figure class="shot"><img src="img/today_onb_5_home.jpg" alt="Home screen showing delivery status" loading="lazy"><figcaption><b>5</b> Only now: do they deliver to you?</figcaption></figure>
+  </div>
+  <p class="finding">Four steps come before you learn whether FirstClub delivers to you. In Play Store reviews, 81 of the 139 complaints from people who never ordered are about finding out late that their area isn't served.</p>
+
+  <h3>Getting help</h3>
+  <div class="strip">
+    <figure class="shot"><img src="img/today_help_1_menu.jpg" alt="Help and Support categories" loading="lazy"><figcaption><b>1</b> Help & Support: 9 FAQ categories</figcaption></figure>
+    <figure class="shot"><img src="img/today_help_2_faq.jpg" alt="Payments and refunds FAQs" loading="lazy"><figcaption><b>2</b> Refund FAQs</figcaption></figure>
+    <figure class="shot"><img src="img/today_help_3_ai.jpg" alt="FirstClub AI assistant" loading="lazy"><figcaption><b>3</b> An AI assistant already exists</figcaption></figure>
+    <figure class="shot"><img src="img/today_help_4_refund.jpg" alt="Assistant asking a clarifying question about a refund" loading="lazy"><figcaption><b>4</b> "I want a refund" starts a conversation</figcaption></figure>
+  </div>
+  <p class="finding">Help is FAQs plus an AI assistant, and asking for a refund starts a back-and-forth. FirstClub's replies to Play Store complaints also point 72% of people to email. I had no past orders, so I couldn't test whether a delivered order has its own report-an-issue path. That's the first thing I'd confirm.</p>
+
+  <h2>Proposed: try it</h2>
+  <div class="demo">
+    <div class="phone" aria-label="Concept prototype phone screen">
+      <div class="p-status"><span>9:41</span><span>Concept</span></div>
+      <div class="p-toast" id="toast"></div>
+      <div class="p-screen" id="screen"></div>
+      <div class="p-nav" id="nav"></div>
+    </div>
+    <div class="notes">
+      <p><b>Pick a scenario:</b></p>
+      <div class="scen" id="scen">
+        <button data-s="normal" class="on">Bad item on the 3rd order<small>Fresh item under the cap: instant credit, no chat, no photo</small></button>
+        <button data-s="cap">Large claim<small>Over ₹400: one photo, credit still instant</small></button>
+        <button data-s="repeat">4th report in 30 days<small>Hand-off to the existing AI assistant, with the order already attached</small></button>
+        <button data-s="late">Late delivery<small>Missed the ETA by 15+ minutes: credit arrives before they ask</small></button>
+        <button data-s="onboard">New user: location first<small>Check the pincode before asking for a phone number</small></button>
+      </div>
+      <div id="explain"></div>
+      <p class="note">Concept screens recreate FirstClub's colours and type from the screenshots. Product photos and the Shimla apple and Nagpur orange prices come from the live catalogue; other prices, the assistant's replies and the serviceable areas are illustrative.</p>
+    </div>
   </div>
 
-  <div class="notes">
-    <div class="eyebrow">Concept prototype · not the FirstClub app</div>
-    <h1>Make it right in one tap</h1>
-    <p>This prototype goes with the <a href="https://gitaakash28.github.io/firstclub-retention-teardown/">FirstClub retention teardown</a> and its <a href="https://github.com/gitaakash28/firstclub-retention-teardown/blob/main/docs/PRD_make-it-right.md">PRD</a>. Among failure reviews, the ones that also complain about support signal churn 3.4x as often (24% vs 7%). So the fix has to be faster than the frustration: no chat, no waiting.</p>
-    <p><b>Try a scenario:</b></p>
-    <div class="scen" id="scen">
-      <button data-s="normal" class="on">Missing milk, 3rd order<small>Fresh item under the cap: instant credit, no photo</small></button>
-      <button data-s="cap">Large claim<small>Over ₹400: ask for a photo, credit still instant</small></button>
-      <button data-s="repeat">4th claim in 30 days<small>Abuse guardrail: route to a person, with context pre-filled</small></button>
-      <button data-s="late">Late delivery<small>Missed the ETA by 15+ minutes: automatic credit before they ask</small></button>
-    </div>
-    <div id="explain"></div>
-    <p class="note">Every claim is also logged by SKU, batch and dark store for the quality team. A credit doubles as a supply-chain signal.</p>
-  </div>
-</div>
+  <footer>Independent concept by Aakash Mishra · not affiliated with or endorsed by FirstClub · <a href="../">back to the case study</a></footer>
+</main>
 
 <script>
 const ITEMS = [
-  { id: "milk", name: "A2 cow milk, 500 ml × 2", price: 98, icon: "🥛", fresh: true },
-  { id: "bread", name: "Sourdough loaf", price: 145, icon: "🍞", fresh: true },
-  { id: "spinach", name: "Spinach, 250 g", price: 39, icon: "🥬", fresh: true },
-  { id: "mango", name: "Alphonso mangoes, 1 kg", price: 449, icon: "🥭", fresh: true },
-  { id: "rice", name: "Sona masoori rice, 5 kg", price: 420, icon: "🍚", fresh: false },
+  { id: "apple", name: "Shimla Apple", meta: "2 pieces (320–360 g)", price: 125, img: "img/p_apple.jpg" },
+  { id: "orange", name: "Nagpur Oranges", meta: "4 pieces (520–600 g)", price: 54, img: "img/p_oranges.jpg" },
+  { id: "milk", name: "A2 cow milk", meta: "500 ml × 2", price: 98, img: "img/p_milk.jpg" },
+  { id: "eggs", name: "Free-range eggs", meta: "Pack of 6", price: 110, img: "img/p_eggs.jpg" },
+  { id: "bread", name: "Fresh bakery bun", meta: "1 piece", price: 85, img: "img/p_bread.jpg" },
+  { id: "greens", name: "Coriander", meta: "1 bunch", price: 25, img: "img/p_greens.jpg" },
 ];
+const ORDER_TOTAL = ITEMS.reduce((t, i) => t + i.price, 0);
 const REASONS = ["Missing", "Damaged", "Poor quality", "Expired"];
 const CAP = 400;
 const EXPLAIN = {
-  normal: [["Entry point", "A \"Something not right?\" button sits on the order card for 48 hours after delivery, for a customer's first 5 orders. No hunting through the help menu."],
-           ["Pick items, pick a reason", "Two taps. A fresh item under the cap needs no photo, because asking a customer to prove spoiled milk is the trust tax the reviews complain about."],
-           ["Instant credit by default", "The money lands in the wallet before the screen changes. A free replacement in the next order is the alternative, and it builds the next order too."]],
-  cap: [["Cap with a soft landing", "Above ₹400 in a claim, a photo is required, but the credit is still instant once it's added. Cost stays bounded without sending the customer to chat."]],
-  repeat: [["Abuse guardrail", "On the 4th claim in 30 days, the claim goes to a person with the order, items and history pre-filled, so the customer never repeats themselves. This guardrail is tracked in the A/B readout (claims per 100 orders)."]],
-  late: [["Proactive, not reactive", "If delivery misses the promised ETA by 15+ minutes, a small credit and an apology arrive automatically. The customer doesn't have to complain to be made whole."]],
+  normal: [["One button, where the problem is", "\"Something not right?\" sits on the order card for 48 hours after delivery, for a customer's first 5 orders. Today the path is Help & Support → FAQs or the assistant."],
+           ["Two taps, no typing", "Pick the item, pick a reason. A fresh item under the cap needs no photo. Asking someone to prove spoiled milk is the trust tax the reviews complain about."],
+           ["Credit before the screen changes", "Wallet credit by default, or a free replacement in the next order, which also brings the next order forward."]],
+  cap: [["A cap with a soft landing", "Above ₹400, one photo is needed, but the credit is still instant once it's added. Cost stays bounded without sending anyone to chat."]],
+  repeat: [["Use the AI FirstClub already has", "On the 4th report in 30 days, the claim goes to the existing assistant with the order and items attached, and a person calls back. The customer never re-explains. Claims per 100 orders is a guardrail in the A/B readout."]],
+  late: [["Say sorry before they ask", "If delivery misses the promised ETA by 15+ minutes, a small credit and an apology arrive automatically."]],
+  onboard: [["Pincode first, phone later", "Today, phone number, age and food preferences come before serviceability. Checking the pincode first saves unserved users four steps, and lets FirstClub collect a 'notify me' list to plan its next dark stores."],
+            ["Why it's ranked first", "RICE 7.2, the highest of the three ideas: cheap to build, and it addresses 81 of the 139 pre-order complaints in reviews. It ships without a test; track install → signup conversion by pincode."]],
 };
-let S = { scenario: "normal", step: "order", picked: {}, reason: {}, resolution: "credit", stars: 0 };
+const ICON = {
+  today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3c2 3 2 6 0 9-2-3-2-6 0-9zM5 9c3 0 5 2 7 5-3 0-5-2-7-5zm14 0c-3 0-5 2-7 5 3 0 5-2 7-5zM12 14v7"/></svg>',
+  aisles: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="7" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg>',
+  finds: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M10 9l5 3-5 3z"/></svg>',
+  reorder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 016 0"/></svg>',
+  profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="9" r="3.5"/><path d="M5 20c1.5-3.5 4-5 7-5s5.5 1.5 7 5"/></svg>',
+};
+let S;
 const $ = (id) => document.getElementById(id);
 const rupee = (n) => "₹" + n.toLocaleString("en-IN");
-
-function total() { return Object.keys(S.picked).filter((k) => S.picked[k]).reduce((t, k) => t + ITEMS.find((i) => i.id === k).price, 0); }
-function ready() { const ks = Object.keys(S.picked).filter((k) => S.picked[k]); return ks.length && ks.every((k) => S.reason[k]); }
-
+const picked = () => Object.keys(S.picked).filter((k) => S.picked[k]);
+const total = () => picked().reduce((t, k) => t + ITEMS.find((i) => i.id === k).price, 0);
+const ready = () => picked().length && picked().every((k) => S.reason[k]);
 function toast(msg) { const t = $("toast"); t.innerHTML = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3800); }
+function nav(on) {
+  $("nav").style.display = on ? "flex" : "none";
+  if (on) $("nav").innerHTML = [["today", "Today"], ["aisles", "Aisles"], ["finds", "Finds"], ["reorder", "Reorder"], ["profile", "Profile"]]
+    .map(([k, l]) => `<div class="${k === "reorder" ? "on" : ""}">${ICON[k]}<span>${l}</span></div>`).join("");
+}
+const bar = (title, back = true) => `<div class="p-bar">${back ? '<button id="back" aria-label="Back">←</button>' : ""}<h2 class="p-title">${title}</h2></div>`;
 
 function render() {
   const sc = $("screen");
-  if (S.step === "order") {
-    sc.innerHTML = `
-      <div class="appbar"><h2>Your orders</h2></div>
-      <div class="card">
-        <div class="row"><b>Order #1042</b><span class="pill">${S.scenario === "late" ? "Delivered · 22 min late" : "Delivered · 18 min ago"}</span></div>
-        <div class="muted">5 items · ${rupee(1151)} · your 3rd order</div>
-        <div style="margin:10px 0 12px;font-size:22px">🥛 🍞 🥬 🥭 🍚</div>
-        ${S.scenario === "late" ? `<div class="banner ok">₹30 credit added for the late delivery. Sorry, that's on us.</div>` : ""}
-        <button class="btn" id="go">Something not right?</button>
-        <div class="muted center" style="margin-top:6px">Available for 48 hours after delivery</div>
+  nav(S.step === "orders");
+  if (S.step === "orders") {
+    const late = S.scenario === "late";
+    sc.innerHTML = `${bar("Your orders", false)}
+      <div class="p-card">
+        <div class="p-row"><b>Today, 8:12 AM</b><span class="p-tag ${late ? "late" : ""}">${late ? "Delivered · 22 min late" : "Delivered · 18 min ago"}</span></div>
+        <div class="p-muted">${ITEMS.length} items · ${rupee(ORDER_TOTAL)} · your 3rd order</div>
+        <div class="p-thumbs">${ITEMS.map((i) => `<img src="${i.img}" alt="${i.name}">`).join("")}</div>
+        ${late ? `<div class="p-banner">₹30 added to your wallet for the late delivery. Sorry, that's on us.</div>` : ""}
+        <button class="p-btn ghost" id="go">Something not right?</button>
+        <div class="p-muted p-center" style="margin-top:6px">Fix it in seconds · available for 48 hours</div>
       </div>
-      <div class="card"><div class="row"><b>Order #0987</b><span class="muted">6 days ago</span></div><div class="muted">7 items · ${rupee(1630)}</div></div>`;
+      <div class="p-card"><div class="p-row"><b>Last Sunday</b><span class="p-muted">Delivered</span></div><div class="p-muted">9 items · ${rupee(1630)}</div></div>`;
     $("go").onclick = () => { S.step = "pick"; render(); };
-    if (S.scenario === "late") setTimeout(() => toast("<b>₹30 added to your wallet</b><br>Order #1042 arrived 22 min after the promised time. No need to ask."), 300);
+    if (late && !S.toasted) { S.toasted = true; setTimeout(() => toast("<b>₹30 added to your wallet</b><br>Your order arrived 22 min after the promised time. No need to ask."), 300); }
   }
   if (S.step === "pick") {
-    sc.innerHTML = `
-      <div class="appbar"><button id="back" aria-label="Back">←</button><h2>What wasn't right?</h2></div>
-      <div class="card">${ITEMS.map((i) => `
-        <div class="item ${S.picked[i.id] ? "on" : ""}" data-id="${i.id}">
-          <div class="thumb">${i.icon}</div>
-          <div class="name">${i.name}<div class="muted">${rupee(i.price)}</div>
-            ${S.picked[i.id] ? `<div class="chips">${REASONS.map((r) => `<button class="chip ${S.reason[i.id] === r ? "on" : ""}" data-r="${r}" data-id="${i.id}">${r}</button>`).join("")}</div>` : ""}
+    sc.innerHTML = `${bar("What wasn't right?")}
+      <div class="p-card">${ITEMS.map((i) => `
+        <div class="p-item ${S.picked[i.id] ? "on" : ""}" data-id="${i.id}">
+          <img src="${i.img}" alt="">
+          <div class="nm">${i.name}<div class="p-muted">${i.meta} · ${rupee(i.price)}</div>
+            ${S.picked[i.id] ? `<div class="p-chips">${REASONS.map((r) => `<button class="p-chip ${S.reason[i.id] === r ? "on" : ""}" data-r="${r}" data-id="${i.id}">${r}</button>`).join("")}</div>` : ""}
           </div>
-          <div class="check">${S.picked[i.id] ? "✓" : ""}</div>
+          <div class="p-check">${S.picked[i.id] ? "✓" : ""}</div>
         </div>`).join("")}</div>
-      ${total() > CAP ? `<div class="banner warn">Claims over ${rupee(CAP)} need one photo. Your credit is still instant.</div>` : ""}
-      <button class="btn" id="next" ${ready() ? "" : "disabled"}>Continue${total() ? " · " + rupee(total()) : ""}</button>`;
-    $("back").onclick = () => { S.step = "order"; render(); };
-    sc.querySelectorAll(".item").forEach((el) => el.onclick = (e) => { if (e.target.classList.contains("chip")) return; S.picked[el.dataset.id] = !S.picked[el.dataset.id]; render(); });
-    sc.querySelectorAll(".chip").forEach((el) => el.onclick = (e) => { e.stopPropagation(); S.reason[el.dataset.id] = el.dataset.r; render(); });
-    $("next").onclick = () => { S.step = S.scenario === "repeat" ? "agent" : (total() > CAP ? "photo" : "resolve"); render(); };
+      ${total() > CAP ? `<div class="p-banner warn">Claims over ${rupee(CAP)} need one photo. Your credit is still instant.</div>` : ""}
+      <button class="p-btn" id="next" ${ready() ? "" : "disabled"}>Continue${total() ? " · " + rupee(total()) : ""}</button>`;
+    $("back").onclick = () => { S.step = "orders"; render(); };
+    sc.querySelectorAll(".p-item").forEach((el) => el.onclick = (e) => { if (e.target.classList.contains("p-chip")) return; S.picked[el.dataset.id] = !S.picked[el.dataset.id]; render(); });
+    sc.querySelectorAll(".p-chip").forEach((el) => el.onclick = (e) => { e.stopPropagation(); S.reason[el.dataset.id] = el.dataset.r; render(); });
+    $("next").onclick = () => { S.step = S.scenario === "repeat" ? "assistant" : (total() > CAP ? "photo" : "resolve"); render(); };
   }
   if (S.step === "photo") {
-    sc.innerHTML = `
-      <div class="appbar"><button id="back" aria-label="Back">←</button><h2>Add one photo</h2></div>
-      <div class="card center" style="padding:36px 14px"><div style="font-size:40px">📷</div><p class="muted">Claims over ${rupee(CAP)} need one photo of the items. Your credit lands the moment it’s added.</p>
-      <button class="btn ghost" id="snap">Take photo</button></div>
-      <button class="btn" id="next" disabled>Continue</button>`;
+    sc.innerHTML = `${bar("Add one photo")}
+      <div class="p-card p-center" style="padding:34px 14px"><div style="font-size:40px">📷</div>
+      <p class="p-muted">Claims over ${rupee(CAP)} need one photo of the items. Your credit lands the moment it's added.</p>
+      <button class="p-btn ghost" id="snap">Take photo</button></div>
+      <button class="p-btn" id="next" disabled>Continue</button>`;
     $("back").onclick = () => { S.step = "pick"; render(); };
     $("snap").onclick = () => { $("snap").textContent = "✓ Photo added"; $("next").disabled = false; };
     $("next").onclick = () => { S.step = "resolve"; render(); };
   }
   if (S.step === "resolve") {
-    sc.innerHTML = `
-      <div class="appbar"><button id="back" aria-label="Back">←</button><h2>How should we fix it?</h2></div>
-      <div class="option ${S.resolution === "credit" ? "on" : ""}" data-v="credit"><div style="font-size:22px">💳</div><div><b>Instant wallet credit · ${rupee(total())}</b><div class="muted">Lands now. Use it on any order.</div></div></div>
-      <div class="option ${S.resolution === "replace" ? "on" : ""}" data-v="replace"><div style="font-size:22px">🔁</div><div><b>Free replacement</b><div class="muted">Added to your next order at no cost.</div></div></div>
-      <button class="btn" id="next" style="margin-top:8px">Confirm</button>`;
+    sc.innerHTML = `${bar("How should we fix it?")}
+      <div class="p-opt ${S.resolution === "credit" ? "on" : ""}" data-v="credit"><div style="font-size:22px">💳</div><div><b>Instant wallet credit · ${rupee(total())}</b><div class="p-muted">Lands now. Use it on any order.</div></div></div>
+      <div class="p-opt ${S.resolution === "replace" ? "on" : ""}" data-v="replace"><div style="font-size:22px">🔁</div><div><b>Free replacement</b><div class="p-muted">Added to your next order at no cost.</div></div></div>
+      <button class="p-btn" id="next" style="margin-top:6px">Confirm</button>`;
     $("back").onclick = () => { S.step = "pick"; render(); };
-    sc.querySelectorAll(".option").forEach((el) => el.onclick = () => { S.resolution = el.dataset.v; render(); });
+    sc.querySelectorAll(".p-opt").forEach((el) => el.onclick = () => { S.resolution = el.dataset.v; render(); });
     $("next").onclick = () => { S.step = "done"; render(); };
   }
-  if (S.step === "agent") {
-    sc.innerHTML = `
-      <div class="appbar"><button id="back" aria-label="Back">←</button><h2>We'll take it from here</h2></div>
-      <div class="card"><b>A person from our team will call you within 30 minutes.</b>
-      <p class="muted">They already have your order, the items and what went wrong, so you won't have to explain it again.</p>
-      <div class="banner warn">Why: this is your 4th report this month. A quick call helps us fix the root cause.</div></div>
-      <button class="btn" id="done">Okay</button>`;
+  if (S.step === "assistant") {
+    const lines = picked().map((k) => `${ITEMS.find((i) => i.id === k).name} (${S.reason[k].toLowerCase()})`).join(", ");
+    sc.innerHTML = `<div class="p-ai">${bar("")}
+      <div class="p-orb">✦</div>
+      <h2 class="p-title p-center">We're on it</h2>
+      <div class="p-ctx" style="margin-top:14px"><b>Shared with the assistant automatically</b><br>Order from today, 8:12 AM · ${lines}</div>
+      <div class="p-bubble">I can see what went wrong with today's order. Since this is your 4th report this month, a teammate will call you within 30 minutes to fix it properly. You won't need to explain anything again.</div>
+      <div class="p-bubble me">Thanks</div>
+      <button class="p-btn" id="done" style="margin-top:8px">Done</button>
+      <p class="p-muted p-center" style="font-size:11px;margin-top:10px">Assistant reply is illustrative</p></div>`;
     $("back").onclick = () => { S.step = "pick"; render(); };
     $("done").onclick = () => reset(S.scenario);
   }
   if (S.step === "done") {
-    sc.innerHTML = `
-      <div class="tick">✓</div>
-      <div class="center"><div class="big">${S.resolution === "credit" ? rupee(total()) + " added" : "Replacement booked"}</div>
-      <div class="muted">${S.resolution === "credit" ? "to your wallet, just now" : "It'll come free with your next order"}</div></div>
-      <div class="card" style="margin-top:18px"><b>Thanks for telling us.</b><div class="muted">Your report went to the quality team for this store and batch, so it doesn't happen to the next person.</div></div>
-      <div class="card center"><div class="muted">How was this fix?</div><div class="stars">${[1, 2, 3, 4, 5].map((n) => `<span data-n="${n}" class="${n <= S.stars ? "on" : ""}">★</span>`).join("")}</div></div>
-      <button class="btn ghost" id="again">Back to orders</button>`;
-    sc.querySelectorAll(".stars span").forEach((el) => el.onclick = () => { S.stars = +el.dataset.n; render(); });
+    sc.innerHTML = `<div class="p-tick">✓</div>
+      <div class="p-big">${S.resolution === "credit" ? rupee(total()) + " added" : "Replacement booked"}</div>
+      <div class="p-muted p-center">${S.resolution === "credit" ? "to your wallet, just now" : "It comes free with your next order"}</div>
+      <div class="p-card" style="margin-top:18px"><b>Thanks for telling us.</b><div class="p-muted">Your report went to the quality team for this store and batch, so it doesn't happen to the next person.</div></div>
+      <div class="p-card p-center"><div class="p-muted">How was this fix?</div><div class="p-stars">${[1, 2, 3, 4, 5].map((n) => `<span data-n="${n}" class="${n <= S.stars ? "on" : ""}">★</span>`).join("")}</div></div>
+      <button class="p-btn ghost" id="again">Back to orders</button>`;
+    sc.querySelectorAll(".p-stars span").forEach((el) => el.onclick = () => { S.stars = +el.dataset.n; render(); });
     $("again").onclick = () => reset(S.scenario);
+  }
+  if (S.step === "pin") {
+    sc.innerHTML = `${bar("Where should we deliver?", false)}
+      <p class="p-muted">Check before you sign up. It takes a second.</p>
+      <div class="p-pin">
+        <button class="p-opt" data-pin="560034"><div style="font-size:20px">📍</div><div><b>560034</b><div class="p-muted">Koramangala, Bengaluru</div></div></button>
+        <button class="p-opt" data-pin="560064"><div style="font-size:20px">📍</div><div><b>560064</b><div class="p-muted">Yelahanka, Bengaluru</div></div></button>
+      </div>
+      <button class="p-btn ghost">Use my current location</button>
+      <p class="p-muted p-center" style="font-size:11px;margin-top:12px">Pick a sample pincode · serviceable areas here are illustrative</p>`;
+    sc.querySelectorAll("[data-pin]").forEach((el) => el.onclick = () => { S.pin = el.dataset.pin; S.step = S.pin === "560034" ? "pin_ok" : "pin_no"; render(); });
+  }
+  if (S.step === "pin_ok") {
+    sc.innerHTML = `${bar("Good news")}
+      <div class="p-tick">✓</div>
+      <div class="p-big">We deliver to Koramangala</div>
+      <div class="p-muted p-center">In about 20 minutes, 6 AM to midnight.</div>
+      <div class="p-card" style="margin-top:18px"><b>Next: your phone number</b><div class="p-muted">Then you're in. Food preferences can wait until after your first order.</div></div>
+      <button class="p-btn" id="again">Continue</button>`;
+    $("back").onclick = () => { S.step = "pin"; render(); };
+    $("again").onclick = () => reset("onboard");
+  }
+  if (S.step === "pin_no") {
+    sc.innerHTML = `${bar("Not yet")}
+      <div class="p-orb" style="background:radial-gradient(circle at 35% 30%,#fbeedb,#e8c48f)">⌛</div>
+      <div class="p-big">We're not in Yelahanka yet</div>
+      <div class="p-muted p-center">You haven't shared a phone number or filled in any forms, so nothing was wasted.</div>
+      <button class="p-btn" id="notify" style="margin-top:20px">Notify me when you arrive</button>
+      <button class="p-btn ghost" id="browse" style="margin-top:8px">Browse the store anyway</button>`;
+    $("back").onclick = () => { S.step = "pin"; render(); };
+    $("notify").onclick = () => toast("<b>You're on the list for 560064.</b><br>Demand like this tells FirstClub where to open next.");
+    $("browse").onclick = () => reset("onboard");
   }
 }
 
 function reset(s) {
-  S = { scenario: s, step: "order", picked: {}, reason: {}, resolution: "credit", stars: 0 };
-  if (s === "cap") { S.picked = { mango: true, bread: true }; S.reason = { mango: "Poor quality", bread: "Expired" }; }
-  if (s === "normal") { S.picked = {}; }
+  S = { scenario: s, step: s === "onboard" ? "pin" : "orders", picked: {}, reason: {}, resolution: "credit", stars: 0, toasted: false };
+  if (s === "cap") { S.picked = { apple: true, eggs: true, milk: true, bread: true }; S.reason = { apple: "Poor quality", eggs: "Damaged", milk: "Expired", bread: "Missing" }; }
   document.querySelectorAll("#scen button").forEach((b) => b.classList.toggle("on", b.dataset.s === s));
   $("explain").innerHTML = (EXPLAIN[s] || []).map(([h, t]) => `<div class="note-step"><b>${h}</b><br>${t}</div>`).join("");
   render();

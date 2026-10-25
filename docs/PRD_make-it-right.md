@@ -16,6 +16,7 @@ FirstClub wins customers on quality: freshness comes up in 66% of its 1,149 posi
 | Positive reviews that mention quality or freshness | 1,149 positive reviews (`results/r6_positive_themes.csv`) | 66% |
 | Negative reviews from people who never ordered (serviceability, OTP or login) | 463 negative reviews (`results/r3_primary_theme_by_stage.csv`) | 30% (139) |
 | FirstClub replies to 1–2★ reviews that send the customer to email (Aug–Oct 2026); replies mentioning a self-serve credit | 223 replies (`results/r8_reply_routing.csv`) | 72% (161); 0 |
+| App walkthrough, 26 Oct 2026 ([screenshots](https://gitaakash28.github.io/firstclub-retention-teardown/prototype/)) | Fresh Android install, no past orders | Help = FAQs + an AI assistant; "I want a refund" gets a clarifying question. Signup asks for phone, age and food preferences before showing whether they deliver. |
 
 **In customers' own words:**
 - "First two orders were smooth and quality excellent… From the third one, it has been an ordeal… items missing." (1★, May 2026)
@@ -41,7 +42,8 @@ New customers in their first 5 orders (habit not yet formed) who hit a missing, 
 ## Solution
 1. **"Something not right?" on the order card** for 48 hours after delivery. The customer picks the items and a reason (missing, damaged, quality, expired) and gets an **instant wallet credit**, with no chat and no photo for fresh items under a value cap. They can also add a free replacement to their next order.
 2. **Proactive late-delivery credit.** If delivery misses the promised ETA by more than 15 minutes, a small credit and an apology land automatically. The customer doesn't have to ask.
-3. **Closing the loop.** Every claim is tagged by SKU, batch and dark store and feeds the quality team's daily view. A credit is also a supply-chain signal.
+3. **Use the assistant FirstClub already has.** Repeat claimers (4th in 30 days) go to the existing AI assistant with the order and items already attached, and a person calls back. The button gives the AI structured context instead of a blank chat box.
+4. **Closing the loop.** Every claim is tagged by SKU, batch and dark store and feeds the quality team's daily view. A credit is also a supply-chain signal.
 
 **Prototype:** [clickable concept](https://gitaakash28.github.io/firstclub-retention-teardown/prototype/) covering the normal claim, a claim over the cap, a repeat claimer and the automatic late credit.
 
@@ -75,4 +77,4 @@ RICE puts location-first onboarding first, so ship it now as the quick win. It f
 1. What's the real 14-day repeat rate after an early-order issue, and does it depend on fix time? ([`day1_sql/03`](../day1_sql/03_repeat_after_issue_by_resolution.sql), which is ready to run.)
 2. What's today's median time to resolve a missing-item complaint? ([`day1_sql/05`](../day1_sql/05_resolution_time_by_channel.sql))
 3. What credit cap per order keeps the unit economics healthy for each category?
-4. Confirm in the current app that there's no self-serve credit path. FirstClub's own replies point to email (72%) and none mention one, but I haven't used the app. Location-after-signup complaints continue through September 2026.
+4. Does a delivered order have its own report-an-issue path? My walkthrough (no past orders) showed FAQs plus an AI assistant, FirstClub's replies point to email (72%), and none mention self-serve credits, but I couldn't test it with a real order.
