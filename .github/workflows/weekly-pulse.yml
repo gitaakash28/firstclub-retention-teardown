@@ -11,6 +11,8 @@ permissions:
 jobs:
   pulse:
     runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Kolkata   # review timestamps come back in local time; keep them in IST like the case study
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
